@@ -351,3 +351,4 @@ MigrationBackup/
 
 # Specific
 datingapp.db*
+appsettings.json
