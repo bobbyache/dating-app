@@ -350,4 +350,4 @@ MigrationBackup/
 .ionide/
 
 # Specific
-datingapp.db
+datingapp.db*
