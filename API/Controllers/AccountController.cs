@@ -3,6 +3,7 @@ using System.Text;
 using API.Data;
 using API.DTOs;
 using API.Entities;
+using API.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -11,21 +12,23 @@ namespace API.Controllers;
 public class AccountController : BaseApiController
 {
     private readonly DataContext context;
+    private readonly ITokenService tokenService;
 
-    public AccountController(DataContext context)
+    public AccountController(DataContext context, ITokenService tokenService)
     {
+        this.tokenService = tokenService;
         this.context = context;
     }
 
     [HttpPost("register")]
-    public async Task<ActionResult<AppUser>> Register(RegisterDto registerDto)
+    public async Task<ActionResult<UserDto>> Register(RegisterDto registerDto)
     {
         if (await UserExists(registerDto.Username)) return BadRequest("Username is taken");
 
         using var hmac = new HMACSHA512();
         var user = new AppUser
         {
-            UserName = registerDto.Username.ToLower(),
+            Username = registerDto.Username.ToLower(),
             PasswordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(registerDto.Password)),
             PasswordSalt = hmac.Key
         };
@@ -33,13 +36,17 @@ public class AccountController : BaseApiController
         context.Users.Add(user);
         await context.SaveChangesAsync();
 
-        return user;
+        return new UserDto
+        {
+            Username = user.Username,
+            Token = tokenService.CreateToken(user)
+        };
     }
 
     [HttpPost("login")]
-    public async Task<ActionResult<AppUser>> Login(LoginDto loginDto)
+    public async Task<ActionResult<UserDto>> Login(LoginDto loginDto)
     {
-        var user = await context.Users.SingleOrDefaultAsync(usr => usr.UserName == loginDto.Username.ToLower());
+        var user = await context.Users.SingleOrDefaultAsync(usr => usr.Username == loginDto.Username.ToLower());
         if (user is null) return Unauthorized("Invalid user");
 
         using var hmac = new HMACSHA512(user.PasswordSalt);
@@ -49,9 +56,13 @@ public class AccountController : BaseApiController
             if (computedHash[i] != user.PasswordHash[i]) return Unauthorized("Invalid password");
         }
 
-        return user;
+        return new UserDto
+        {
+            Username = user.Username,
+            Token = tokenService.CreateToken(user)
+        };
     }
 
 
-    private async Task<bool> UserExists(string username) => await context.Users.AnyAsync(usr => usr.UserName == username.ToLower());
+    private async Task<bool> UserExists(string username) => await context.Users.AnyAsync(usr => usr.Username.ToLower() == username.ToLower());
 }
