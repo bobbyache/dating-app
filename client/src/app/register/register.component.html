@@ -3,12 +3,6 @@
     <hr>
     <div class="mb-3">
         <input type="text" class="form-control" name="username" [(ngModel)]="model.username" placeholder="Username" />
-        <div class="mb-3">
-            <label>Who is your favourite user?</label>
-            <select class="form-select">
-                <option *ngFor="let user of usersFromHomeComponent" [value]="user.username">{{user.username}}</option>
-            </select>
-        </div>
         <input type="password" class="form-control" name="password" [(ngModel)]="model.password" placeholder="Password" />
     </div>
     <div class="text-center">
