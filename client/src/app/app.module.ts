@@ -17,20 +17,25 @@ import { MessagesComponent } from './messages/messages.component';
 import { SharedModule } from './_modules/shared.module';
 import { TestErrorComponent } from './errors/test-error/test-error.component';
 import { ErrorInterceptor } from './_interceptors/error.interceptor';
+import { NotFoundComponent } from './errors/not-found/not-found.component';
+import { ServerErrorComponent } from './errors/server-error/server-error.component';
 
 @NgModule({
-    declarations: [AppComponent, NavComponent, HomeComponent, RegisterComponent, MemberListComponent, MemberDetailComponent, ListsComponent, MessagesComponent, TestErrorComponent],
-    imports: [
-        BrowserModule,
-        AppRoutingModule,
-        HttpClientModule,
-        FormsModule,
-        SharedModule,
-        BrowserAnimationsModule
+    declarations: [
+        AppComponent,
+        NavComponent,
+        HomeComponent,
+        RegisterComponent,
+        MemberListComponent,
+        MemberDetailComponent,
+        ListsComponent,
+        MessagesComponent,
+        TestErrorComponent,
+        NotFoundComponent,
+        ServerErrorComponent,
     ],
-    providers: [
-        { provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true }
-    ],
+    imports: [BrowserModule, AppRoutingModule, HttpClientModule, FormsModule, SharedModule, BrowserAnimationsModule],
+    providers: [{ provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true }],
     bootstrap: [AppComponent],
 })
 export class AppModule {}
