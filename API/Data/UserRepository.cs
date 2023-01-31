@@ -29,7 +29,9 @@ namespace API.Data
 
         public async Task<IEnumerable<MemberDto>> GetMembersAsync()
         {
-            throw new NotImplementedException();
+            return await context.Users
+                .ProjectTo<MemberDto>(mapper.ConfigurationProvider)
+                .ToListAsync();
         }
 
         public async Task<AppUser> GetUserByIdASync(int id)
