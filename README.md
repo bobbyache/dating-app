@@ -254,6 +254,9 @@ app.UseAuthentication();
 app.UseAuthorization();
 ```
 
+## Client Token Interceptor
+
+To understand how the token is attached to each logged in user request have a look at the how the `client\src\app\_interceptors\jwt.interceptor.ts` works. Note that the user is taken from local storage as the current user (look at the `AccountService`). On each request the `user.token` is attached as an `Authorization` header.
 
 # Validation
 
