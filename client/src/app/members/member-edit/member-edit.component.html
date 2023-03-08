@@ -1,7 +1,7 @@
 <div class="row" *ngIf="member">
     <div class="col-4"><h1>Your Profile</h1></div>
     <div class="col-8">
-        <div class="alert alert-info">
+        <div class="alert alert-info" *ngIf="editForm.dirty">
             <p><strong>Information: </strong>You have made changes. Any unsaved changes will be lost.</p>
         </div>
     </div>
@@ -31,7 +31,7 @@
                 </div>
             </div>
             <div class="card-footer">
-                <button class="btn btn-success col-12" form="editForm">Save Changes</button>
+                <button class="btn btn-success col-12" [disabled]="!editForm.dirty" form="editForm">Save Changes</button>
             </div>
         </div>
     </div>
