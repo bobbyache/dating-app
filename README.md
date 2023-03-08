@@ -23,7 +23,23 @@ dotnet sln add API/API.csproj
 
 # Development Commands
 
-`dotnet watch run` enables hot reload. Doesn't always work correctly. To run the API Server you'll use `dotnet watch run --no-hot-reload`. To update the database after making changes you'll use `dotnet ef database update`. To run Angular you'll use use `ng serve`.
+`dotnet watch` enables hot reload (unless you've disable the feature in your `launchSettings.json`). Doesn't always work correctly. To run the API Server you'll use `dotnet watch --no-hot-reload`. To update the database after making changes you'll use `dotnet ef database update`. To run Angular you'll use use `ng serve`.
+
+To disable hot reload you can try going to `Properties/launchSettings.json` and add the following piece of JSON. However this currently doesn't seem to work.
+
+```json
+{
+  "profiles": {
+    "api": {
+		...
+      "hotReloadEnabled": false,
+		...
+    }
+  }
+}
+```
+
+So the option is just using `--no-hot-reload`.
 
 ### .NET Core SDK
 
@@ -86,6 +102,20 @@ Windows 10
 
 If you get a prompt, click “Yes”
 
+# Use HTTPS for the Server
+
+When running requests to the Server you will run ito a `net::ERR_CERT_AUTHORITY_INVALID` response which shows up in your console every time you run a request against the server. You'll probably also see a "Your connection is not private" page with a "Proceed to localhost (unsafe)" link.
+
+You can install a dev certificate by running the following commands in your api root folder.
+```
+dotnet dev-certs https --clean
+dotnet dev-certs https --trust
+```
+
+At this point everything should work correctly and you should not get the invalid certifate error. Also when your API loads the swagger page you shouldn't get the warning page and clicking on the lock icon in the address bar should tell you that the connection is valid. Drilling in here should show that the certificate is valid.
+
+- [ ] How do I reinstate an expire certificate?
+
 # Use HTTPS with Postman
 
 Postman cannot validate our self-signed certificate as it is "self signed". By default Postman wants to verify certificates over HTTPS. To get around this, in Postman go into Settings -> General and turn off SSL Certificate Verification.
@@ -130,6 +160,10 @@ These files SHOULD NOT be saved to source control (especially the production set
 - [Angular Bootstrap](https://ng-bootstrap.github.io/#/home) - You'll generally following the manual install instructions, add the styles to `angular.json`.
 - [json2ts](http://json2ts.com/) - Generates TypeScript interfaces from JSON.
 
+# UI Components and Libraries
+- https://www.npmjs.com/package/@kolkov/ngx-gallery
+
+
 # CORS considerations
 
 Since the Angular application is served on a different host (different port) to the API attempts to call `localhost:5001` will result in  CORS policy block error. So `Access-Control-Allow-Origin` header needs to be set by the API.
@@ -152,4 +186,161 @@ app.UseCors(builder => builder.AllowAnyHeader().AllowAnyMethod()
 Once this is done, the `Access-Control-Allow-Origin` header will be sent with every response.
 
 # Security
+
+If you want to know how to log in with any given user take a look at the `Seed.cs` class to see what the generated password is. It should be `Pa$$w0rd`.
+
+Its always good to store the password hash as opposed to a password. This is a one way encryption method so one cannot decrypt back from the password to the hash. However this is not enough because if a user uses a weak well known password the hash will be recognisable and if the database is compromized and the attacker notices that Jack and Jill have the same hash and that hash maps back to a well known password online the attacker can use that password to gain access to both user's account.. Online there are dictionaries of hashes that map back to commonly used passwords based on common algorithms used to hash them. Salting protects against [dictionary attacks](https://en.wikipedia.org/wiki/Dictionary_attack).
+
+Hashing and salting (another randomized string) a password means that even though Jack and Jill have the same hashed password the result of the salt means that there is no way to determine that their passwords are the same.
+
+So the database has both a password hash field and a password salt field.
+
+See the `AccountController` to see how the user registers and logs in. Hashing is used using `HMACSHA512`. The `hmac.Key` will be used to obtain the `PasswordSalt`.
+
+```csharp
+	using var hmac = new HMACSHA512();
+	var user = new AppUser
+	{
+		Username = registerDto.Username.ToLower(),
+		PasswordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(registerDto.Password)),
+		PasswordSalt = hmac.Key
+	};
+```
+
+Now during login we can check the login password to make sure that it corresponds to the one we have registered based on the hash and the hash salt.
+
+```csharp
+	using var hmac = new HMACSHA512(user.PasswordSalt);
+	var computedHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(loginDto.Password));
+	for (int i = 0; i < computedHash.Length; i++)
+	{
+		if (computedHash[i] != user.PasswordHash[i]) return Unauthorized("Invalid password");
+	}
+```
+
+For insight into how the token is created have a look at the `TokenService` which allows us to abstract the creation of the token away from the rest of the application. This will also allow us to swap out the service during unit testing.
+
+## JSON Web Tokens
+
+This should be a REST service. Hence one does not want to hold state. Therefore a JSON web token is preferred as a form of authentication. Once the user has a token, the service does not need to hit the database on every attempt.
+
+Creating the token is also abstracted from the rest of the application using a `TokenService`. Use [this site to decode the JWT](https://jwt.ms/). The service is inject as `AddScoped` because it is not necessary on every call. It is only necessary when we need to create a token.
+
+The `TokenService` reads from the configuration from `appSettings` `TokenKey` to retrieve the key used to encrypt the token. The token will consist of a number of claims amongst other properties.
+
+The `Authorize` attribute above the controller method handles whether the bearer token is going to be asserted against or not.
+
+Now the service needs to know how to authenticate. This is done in two parts:
+
+- Add a service
+- Add some middleware
+
+The `IdentityServiceExtensions` middleware class which uses the `Microsoft.AspNetCore.Authentication.JwtBearer` package defines how the system will validate the token. Note how it reads the `TokenKey` from the APIs config.
+
+The following needs to be applied in the order that it is presented here. The first line finds out who you are. The second line asserts that you have the rights to access the resource.
+
+```csharp
+app.UseAuthentication();
+app.UseAuthorization();
+```
+
+
+# Validation
+
+Validation attributes (if they are used) should be applied to the DTO and not the Entity classes. Simply adding a `Required` attribute to the `RegisterDto` field would result in the API passing back a 400 Bad Request if the field is not populated. `ControllerBase` is the controller class that allows this auto binding and validation to take place.
+
+`ModelState` also tracks whether the model being passed in is valid. Although shouldn't need to use it everything is set up correctly.
+
+With the validation setup in code you will always get a response like this:
+
+```json
+{
+    "type": "https://tools.ietf.org/html/rfc7231#section-6.5.1",
+    "title": "One or more validation errors occurred.",
+    "status": 400,
+    "traceId": "00-3dde7aa1218c88b1566d6127abdbd5fd-69c7ee216d8fb68a-00",
+    "errors": {
+        "Password": [
+            "The Password field is required."
+        ],
+        "Username": [
+            "The Username field is required."
+        ]
+    }
+}
+```
+
+# Error Handling
+
+## Server
+
+Be sure that this code is commented out in your `Program.cs` class. If you comment out the C# code to use the developer exception page you'll get a nicely formed JSON response which includes the stack trace as part of it. Why? If this below code is executed, MVC will swallow the exception and attempt to redirect to an exception page. Since this is an API, we would rather send a JSON response.
+
+
+```csharp
+if (builder.Environment.IsDevelopment())
+{
+    app.UseDeveloperExceptionPage();
+}
+```
+
+Go to your `launchSettings.json` file and replace the `ASPNETCORE_ENVIRONMENT` setting from `Development` to `Production`. Now if you run `GET https://localhost:5001/api/buggy/server-error` you'll only get the following results back in the response:
+
+```json
+{
+    "statusCode": 500,
+    "message": "Object reference not set to an instance of an object.",
+    "details": "Internal Server Error"
+}
+```
+
+The stack space is not included (for security reasons) and this will probably not how you want it handled in development mode.
+
+If you set it back to `Development` you will see the entire stack trace returned.
+
+You might think that we need to add code like this to every controller method to catch unhandled exceptions and return the correct status code.
+
+```csharp
+try
+{
+	...
+}
+catch (Exception ex)
+{
+	return StatusCode(500, "Computer says no!");
+}
+```
+No. Rather, handle exceptions at the highest level. If we have our exception handling middleware at the top of the middleware tree that means that whatever exception is thrown will be handled at this level. Exceptions bubble up to the highest level where they can be handled and middleware executes in order.
+
+Look at your `Program.cs` file to see where `app.UseMiddleware<ExceptionMiddleware>();` is positioned. Its the first piece of middleware! This is important! It saves us writing the code above for each controller method.
+
+Look at the `Errors/ApiException.cs` class. Here is where we create the response format for an internal server error. The `Details` field will become the stack trace.
+
+Another class `ExceptionMiddleware` is used as the middleware that handles the uncaught exception and creates the `ApiException` response object. In this class we inject an `ILogger` class to do any necessary logging. The `IHostEnvironment` will allow us to know whether we are in development mode or production mode. Note how the response is changed depending on the environment we're in!
+
+The middleware framework expects a `InvokeAsync` method. The `RequestDelegate` will be called to go to the next piece of middleware in the pipeline. The try... catch... block will catch any exception bubbled up from anywhere downstream in the pipeline.
+
+## Client
+
+The `_interceptors\error.interceptor.ts` handles any errors coming through via the API. It simply looks for the `error.status` and depending what it is (or isn't), handles it by either displaying a `toastr` message or navigating to an error page. Both the router and the `toastr` is injected via the constructor.
+
+
+### Not Found Errors
+
+Note in the module `app-routing.module.ts` the following line at the end of the routes indicates that any route that does not exist will end up navigating to the not found component.
+
+
+```typescript
+{ path: '**', component:NotFoundComponent, pathMatch: 'full' },
+```
+
+### Internal Server Errors
+
+The interceptor sends through router state using a construct called `NavigationExtras`. While navigating and hitting the constructor for the `ServerErrorComponent` this data will be available as long as the router is injected in the constructor.
+
+```typescript
+const navigationExtras: NavigationExtras = { state: {error: error.error}};
+```
+
+Allows the page to show some information passed to it by the intercepted error.
 
