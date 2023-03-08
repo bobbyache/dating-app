@@ -161,8 +161,18 @@ These files SHOULD NOT be saved to source control (especially the production set
 - [json2ts](http://json2ts.com/) - Generates TypeScript interfaces from JSON.
 
 # UI Components and Libraries
-- https://www.npmjs.com/package/@kolkov/ngx-gallery
 
+### ngx-gallery
+- https://www.npmjs.com/package/@kolkov/ngx-gallery
+- `npm install @kolkov/ngx-gallery`
+
+If you run into an issue like this:
+```
+npm ERR! Fix the upstream dependency conflict, or retry
+npm ERR! this command with --force, or --legacy-peer-deps
+npm ERR! to accept an incorrect (and potentially broken) dependency resolution.
+```
+Run the install again like this `npm install @kolkov/ngx-gallery --legacy-peer-deps` as the author might not have got around to updating his component to say that is ok to use Angular XX. Can use one or two of the suggested switches.
 
 # CORS considerations
 
