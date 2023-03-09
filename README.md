@@ -166,6 +166,9 @@ These files SHOULD NOT be saved to source control (especially the production set
 - https://www.npmjs.com/package/@kolkov/ngx-gallery
 - `npm install @kolkov/ngx-gallery`
 
+### ngx-spinner
+- https://www.npmjs.com/package/ngx-spinner
+
 If you run into an issue like this:
 ```
 npm ERR! Fix the upstream dependency conflict, or retry
@@ -368,3 +371,20 @@ Look for the `AutoMapperProfiles` which is where you set up your mapping.
 If successful will always return a `NotContent` which effectively a 204. This is simply the server's way of saying. Everything went Ok, but I've got nothing else to send back to you. Naturally the client will have all the data it has requested the server to update.
 
 Take a look at the `UsersController.UpdateUser()` method. If there are no changes to the user, the method will return a `BadRequest` as there were no changes to update. This means that `SaveAllAsync()` will return false. This is the expected behavior.
+
+# Spinner and Requests
+
+
+### ngx-spinner
+
+The [package](https://www.npmjs.com/package/ngx-spinner) can be found here. But if you go to the GitHub site you'll get some more information [here](https://github.com/Napster2210/ngx-spinner).j The `ng add ngx-spinner` didn't work so try the `$ npm install ngx-spinner --save` and that still gives you errors but if you look closely enough at the error text you'll see that you can use `npm install ngx-spinner --save --legacy-peer-deps` and this works. Again this is simply because the developer has not published enough up to date info.
+
+Once done note that the style is added to `angular.json` and the necessary import is added to `shared.module.ts`. The chosen animation is `ball-scale-multiple`.
+
+Now there could be more than one http requests going on at the same time so to handle this scenario we make use of `busyRequestCount` in the `BusyService`. This way the count increments and decrements as the requests intiate and complete and when there are no requests left the result should be 0.
+
+### How dow we know?
+
+Use and interceptor. 
+
+### Simulating the slow response time
