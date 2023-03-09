@@ -379,6 +379,8 @@ Take a look at the `UsersController.UpdateUser()` method. If there are no change
 
 The [package](https://www.npmjs.com/package/ngx-spinner) can be found here. But if you go to the GitHub site you'll get some more information [here](https://github.com/Napster2210/ngx-spinner).j The `ng add ngx-spinner` didn't work so try the `$ npm install ngx-spinner --save` and that still gives you errors but if you look closely enough at the error text you'll see that you can use `npm install ngx-spinner --save --legacy-peer-deps` and this works. Again this is simply because the developer has not published enough up to date info.
 
+If this doesn't work double check the GitHub page and look for which version is compatible with which version of Angular. In the original case this was that a specific version `npm install ngx-spinner@14.0.0 --save --legacy-peer-deps` had to be installed for Angular 14.
+
 Once done note that the style is added to `angular.json` and the necessary import is added to `shared.module.ts`. The chosen animation is `ball-scale-multiple`.
 
 Now there could be more than one http requests going on at the same time so to handle this scenario we make use of `busyRequestCount` in the `BusyService`. This way the count increments and decrements as the requests intiate and complete and when there are no requests left the result should be 0.
