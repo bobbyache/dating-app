@@ -357,3 +357,14 @@ const navigationExtras: NavigationExtras = { state: {error: error.error}};
 
 Allows the page to show some information passed to it by the intercepted error.
 
+# AutoMapper
+
+Look for the `AutoMapperProfiles` which is where you set up your mapping.
+
+# HTTP request types and responses.
+
+### HttpPut
+
+If successful will always return a `NotContent` which effectively a 204. This is simply the server's way of saying. Everything went Ok, but I've got nothing else to send back to you. Naturally the client will have all the data it has requested the server to update.
+
+Take a look at the `UsersController.UpdateUser()` method. If there are no changes to the user, the method will return a `BadRequest` as there were no changes to update. This means that `SaveAllAsync()` will return false. This is the expected behavior.

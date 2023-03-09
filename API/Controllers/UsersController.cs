@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using API.Data;
 using API.DTOs;
 using API.Entities;
@@ -32,5 +33,25 @@ public class UsersController : BaseApiController
     public async Task<ActionResult<MemberDto>> GetUser(string username)
     {
         return await userRepository.GetMemberAsync(username);
+    }
+
+    [HttpPut]
+    public async Task<ActionResult> UpdateUser(MemberUpdateDto memberUpdateDto)
+    {
+        // var username = User.Identity.Name;
+        var username = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        var user = await userRepository.GetUserByUsernameAsync(username);
+
+        if (user == null) return NotFound();
+
+        mapper.Map(memberUpdateDto, user);
+
+        //
+        // This is the correct response to return for an HttpPut.
+        // everything was ok, but I've got nothing more to send back to you.
+        // the client should have the information as to what they've changed.
+        if (await userRepository.SaveAllAsync()) return NoContent();
+
+        return BadRequest("Failed to update user");
     }
 }
