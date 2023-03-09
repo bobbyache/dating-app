@@ -374,7 +374,6 @@ Take a look at the `UsersController.UpdateUser()` method. If there are no change
 
 # Spinner and Requests
 
-
 ### ngx-spinner
 
 The [package](https://www.npmjs.com/package/ngx-spinner) can be found here. But if you go to the GitHub site you'll get some more information [here](https://github.com/Napster2210/ngx-spinner).j The `ng add ngx-spinner` didn't work so try the `$ npm install ngx-spinner --save` and that still gives you errors but if you look closely enough at the error text you'll see that you can use `npm install ngx-spinner --save --legacy-peer-deps` and this works. Again this is simply because the developer has not published enough up to date info.
@@ -387,6 +386,8 @@ Now there could be more than one http requests going on at the same time so to h
 
 ### How dow we know?
 
-Use and interceptor. 
+Use and interceptor.  See `LoadingInterceptor` and how it interacts with the ngx-spinner and `BusyService`.
 
-### Simulating the slow response time
+# Caching
+
+Have a look at the `MembersService` to see how in-memory client-side caching is implemented using observables and arrays within the service. Note that the `updateMember`uses the spread operator to neatly ensure that an updated member does not need to be refetched from the server with another call as the client should have all the necessary data to display the updated member.
