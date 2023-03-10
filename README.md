@@ -159,6 +159,7 @@ These files SHOULD NOT be saved to source control (especially the production set
 # Productivity Tips
 - [Angular Bootstrap](https://ng-bootstrap.github.io/#/home) - You'll generally following the manual install instructions, add the styles to `angular.json`.
 - [json2ts](http://json2ts.com/) - Generates TypeScript interfaces from JSON.
+- [Cloudinary](https://cloudinary.com/) - Free cloud service with up to 10 Gigs.
 
 # UI Components and Libraries
 
@@ -391,3 +392,48 @@ Use and interceptor.  See `LoadingInterceptor` and how it interacts with the ngx
 # Caching
 
 Have a look at the `MembersService` to see how in-memory client-side caching is implemented using observables and arrays within the service. Note that the `updateMember`uses the spread operator to neatly ensure that an updated member does not need to be refetched from the server with another call as the client should have all the necessary data to display the updated member.
+
+# Storing Images
+
+Storing images as Large Binary Ojbects (BLOBs) is not efficient. Databases are not meant for this. File systems are optimized for storing files so storing files on the web server. However, this is not a good idea if you need to scale in the future.
+- Space issue. How much space do we have?
+- Aspect ratio
+- CPU contention
+
+Using a cloud system can be unlimited space but would come at a cost. Can use their logic to handle the aspect ratios of the images that we wish to have on our site.
+
+## Steps to store a new image
+- Client uploads photo to API with JWT.
+- Server uploads the photo to Cloudinary (securely with API keys).
+- Cloudinary stores the photo and sends the response.
+- API saves photo URL and public ID to our server's database.
+- Each photo is given an auto generated ID when its database record is created.
+- 201 Created response sent back to the client with a location header.
+
+To get information about the various and SDKs and their usage one can go to the documentation. [This link takes you straight to how](https://cloudinary.com/documentation/dotnet_integration) you'd work with the API using .NET SDK.
+
+A nuget package exists called `CloudinaryDotNet` by `Cloudinary` and so the nuget package installation is a requirement.
+
+### Configuration
+
+The configuration will be added to `appsettings.json`. These are NOT settings that you'll want to store on GitHub! Ensure that this file is added to your `.gitignore` file.
+
+```json
+{
+    "Logging": {
+        "LogLevel": {
+            "Default": "Information",
+            "Microsoft.AspNetCore": "Warning"
+        }
+    },
+    "AllowedHosts": "*",
+    "CloudinarySettings": {
+        "CloudName": "...",
+        "ApiKey": "...",
+        "ApiSecret": "..."
+    }
+}
+
+```
+
+The `IPhotoService` enscapsulates the logic of saving the photo to and from the cloud so have a look here to see how it works.
