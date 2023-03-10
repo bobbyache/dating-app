@@ -437,3 +437,10 @@ The configuration will be added to `appsettings.json`. These are NOT settings th
 ```
 
 The `IPhotoService` enscapsulates the logic of saving the photo to and from the cloud so have a look here to see how it works.
+
+### Return location of the created resource (HATEOS)
+
+Also take al ook at how when the photo is uploaded the following standards are met:
+- The response is a `201 Created`.
+- The `PhotoDto` is returned with the response.
+- A `Location` header is added (where to find the response on the server).

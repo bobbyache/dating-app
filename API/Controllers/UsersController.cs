@@ -75,7 +75,15 @@ public class UsersController : BaseApiController
         };
 
         user.Photos.Add(photo);
-        if (await userRepository.SaveAllAsync()) return mapper.Map<PhotoDto>(photo);
+
+        //
+        // Create a 201 Created response with some information as to where to find the resource (HATEOS).
+        // ... and we send back the newly created resource url in the Location header.
+        if (await userRepository.SaveAllAsync())
+        {
+            return CreatedAtAction(nameof(GetUser), new { username = user.Username }, mapper.Map<PhotoDto>(photo));
+        }
+
         return BadRequest("Problem adding photo");
     }
 }
