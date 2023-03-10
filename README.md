@@ -11,6 +11,12 @@ npm install -g @angular/cli@14
 
 Need to install bootstrap and this can be done manually with `npm install ngx-bootstrap`. Follow the [instructions here](https://ng-bootstrap.github.io/#/getting-started) to complete this installation.
 
+### Delete and reinstall
+
+```
+rm -rf node_modules && npm i --legacy-peer-deps
+```
+
 ### Creating .NET Core Projects
 
 Use `dotnet new list` to see a list of project templates you can use to create .NET projects.
@@ -403,6 +409,7 @@ Storing images as Large Binary Ojbects (BLOBs) is not efficient. Databases are n
 Using a cloud system can be unlimited space but would come at a cost. Can use their logic to handle the aspect ratios of the images that we wish to have on our site.
 
 ## Steps to store a new image
+
 - Client uploads photo to API with JWT.
 - Server uploads the photo to Cloudinary (securely with API keys).
 - Cloudinary stores the photo and sends the response.
@@ -444,3 +451,13 @@ Also take al ook at how when the photo is uploaded the following standards are m
 - The response is a `201 Created`.
 - The `PhotoDto` is returned with the response.
 - A `Location` header is added (where to find the response on the server).
+
+### Client File Upload
+
+[ng2-file-upload](https://valor-software.com/ng2-file-upload/) is an Angular file upload component used in this solution. Although this looks like its really out of date it is actually continuously maintained. The versioning is weird.
+
+Use `npm install ng2-file-upload@next` but use `npm install ng2-file-upload@next --legacy-peer-deps` if you have issues installing it. However things had changed when you tried it didn't work so you used a specific verion and added this to the dependencies:
+
+```
+"ng2-file-upload": "2.0.0-3",
+```
