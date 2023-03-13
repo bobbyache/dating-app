@@ -293,6 +293,22 @@ With the validation setup in code you will always get a response like this:
 }
 ```
 
+### Defensive Error Handling
+
+In the `register.component.html` file is an example of how defensive programming can be done right on the backend. The backend will have the same validations as the front-end but it could quite possibly have additional validations. If a bug occurs in the SPA and a validation does not take place, the server will throw back the missed validation error. The server can also response with more complicated validation errors that require a round trip or checks against the database.
+
+This approach means that if the UI handles the validation a round trip to the server is prevented. However, if the validation is circumvented for some reason an invalid validation response will still be thrown back from the server.
+
+```html
+    <div class="row" *ngIf="validationErrors">
+        <ul class="text-danger">
+            <li *ngFor="let error of validationErrors">{{ error }}</li>
+        </ul>
+    </div>
+```
+
+This is also a clever little trick to make sure the user cannot submit without the form being valid: `(ngSubmit)="registerForm.valid && register()"`.
+
 # Error Handling
 
 ## Server

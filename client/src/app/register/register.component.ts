@@ -1,5 +1,6 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { AbstractControl, FormBuilder, FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { AccountsService } from '../_services/accounts.service';
 
@@ -11,11 +12,11 @@ import { AccountsService } from '../_services/accounts.service';
 export class RegisterComponent implements OnInit {
     
     @Output() cancelRegister = new EventEmitter();
-    model: any = {};
     registerForm: FormGroup = new FormGroup({});
     maxDate: Date = new Date();
+    validationErrors: string | undefined;
 
-    constructor(private accountService: AccountsService, private toastr: ToastrService, private fb: FormBuilder) {}
+    constructor(private accountService: AccountsService, private toastr: ToastrService, private fb: FormBuilder, private router: Router) {}
 
     ngOnInit(): void {
         this.initializeForm();
@@ -45,17 +46,28 @@ export class RegisterComponent implements OnInit {
     }
 
     register() {
-        console.log(this.registerForm?.value);
-        // this.accountService.register(this.model).subscribe({
-        //     next: response => {
-        //         this.cancel();
-        //     },
-        //     error: error => console.log(error) // this.toastr.error(error.error)
-        // });
+        const dob = this.getDateOnly(this.registerForm.controls['dateOfBirth'].value);
+        const values = { ...this.registerForm.value, dateOfBirth: dob };
+
+        this.accountService.register(values).subscribe({
+            next: response => {
+                this.router.navigateByUrl('/members');
+            },
+            error: error => {
+                this.validationErrors = error;
+            }
+        });
     }
 
     cancel() {
         console.log('Cancelled');
         this.cancelRegister.emit(false);
+    }
+
+    private getDateOnly(dob: string | undefined) {
+        if (!dob) return;
+        let theDob = new Date(dob);
+        return new Date(theDob.setMinutes(theDob.getMinutes() - theDob.getTimezoneOffset()))
+            .toISOString().slice(0,10);
     }
 }
