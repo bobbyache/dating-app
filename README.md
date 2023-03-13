@@ -461,3 +461,11 @@ Use `npm install ng2-file-upload@next` but use `npm install ng2-file-upload@next
 ```
 "ng2-file-upload": "2.0.0-3",
 ```
+
+# Reactive Forms
+
+### Importing the Module
+
+You have to import the `ReactiveFormsModule` from `@angular/forms`. Reactive forms are component based and so the the form is controlled via the component rather than in the template. Template forms are template driven.
+
+See `register.component.html` for code.

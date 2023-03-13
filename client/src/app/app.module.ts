@@ -5,7 +5,7 @@ import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { NavComponent } from './nav/nav.component';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { HomeComponent } from './home/home.component';
@@ -40,13 +40,21 @@ import { PhotoEditorComponent } from './members/photo-editor/photo-editor.compon
         ServerErrorComponent,
         MemberCardComponent,
         MemberEditComponent,
-        PhotoEditorComponent,
+        PhotoEditorComponent
     ],
-    imports: [BrowserModule, AppRoutingModule, HttpClientModule, FormsModule, SharedModule, BrowserAnimationsModule],
+    imports: [
+        BrowserModule,
+        AppRoutingModule,
+        HttpClientModule,
+        FormsModule,
+        ReactiveFormsModule,
+        SharedModule,
+        BrowserAnimationsModule
+    ],
     providers: [
-        {provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true},
-        {provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true},
-        {provide: HTTP_INTERCEPTORS, useClass: LoadingInterceptor, multi: true}
+        { provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true },
+        { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true },
+        { provide: HTTP_INTERCEPTORS, useClass: LoadingInterceptor, multi: true }
     ],
     bootstrap: [AppComponent],
 })
