@@ -268,6 +268,14 @@ app.UseAuthorization();
 
 To understand how the token is attached to each logged in user request have a look at the how the `client\src\app\_interceptors\jwt.interceptor.ts` works. Note that the user is taken from local storage as the current user (look at the `AccountService`). On each request the `user.token` is attached as an `Authorization` header.
 
+# Reactive Forms
+
+### Importing the Module
+
+You have to import the `ReactiveFormsModule` from `@angular/forms`. Reactive forms are component based and so the the form is controlled via the component rather than in the template. Template forms are template driven.
+
+See `register.component.html` for code.
+
 # Validation
 
 Validation attributes (if they are used) should be applied to the DTO and not the Entity classes. Simply adding a `Required` attribute to the `RegisterDto` field would result in the API passing back a 400 Bad Request if the field is not populated. `ControllerBase` is the controller class that allows this auto binding and validation to take place.
@@ -292,6 +300,16 @@ With the validation setup in code you will always get a response like this:
     }
 }
 ```
+
+### Client-side validation
+
+> REMEMBER: Client-side validation is a nice-to-have. Server side validation is a necessity!
+
+Most input fields are managed using a reusable `text-input.component.ts` control. Pass in the type of the control to change its appearance and behavior. The validations are applied to each `AbstractControl` via the parent component (`register.component.ts`) using a reactive forms approach. This is not the template driven approach in which the template drives the form behavior. Rather, the behavior is drive from a `FormGroup`.
+
+To handle cross field validation on the client side, take a look at the `updateValueAndValidity()` method of the confirm password field.
+
+To have a look to see how custom validations can be applied have a look at the `matchValues()` method.
 
 ### Defensive Error Handling
 
@@ -478,10 +496,3 @@ Use `npm install ng2-file-upload@next` but use `npm install ng2-file-upload@next
 "ng2-file-upload": "2.0.0-3",
 ```
 
-# Reactive Forms
-
-### Importing the Module
-
-You have to import the `ReactiveFormsModule` from `@angular/forms`. Reactive forms are component based and so the the form is controlled via the component rather than in the template. Template forms are template driven.
-
-See `register.component.html` for code.
