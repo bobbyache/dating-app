@@ -438,6 +438,8 @@ Use and interceptor.  See `LoadingInterceptor` and how it interacts with the ngx
 
 Have a look at the `MembersService` to see how in-memory client-side caching is implemented using observables and arrays within the service. Note that the `updateMember`uses the spread operator to neatly ensure that an updated member does not need to be refetched from the server with another call as the client should have all the necessary data to display the updated member.
 
+Take a look at how the `getMember()` takes advantage of the `memberCache` to retrieve members already in memory by making clever use of the `reduce()` method.
+
 # Storing Images
 
 Storing images as Large Binary Ojbects (BLOBs) is not efficient. Databases are not meant for this. File systems are optimized for storing files so storing files on the web server. However, this is not a good idea if you need to scale in the future.
