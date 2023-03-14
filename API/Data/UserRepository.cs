@@ -52,7 +52,7 @@ namespace API.Data
                 userParams.PageSize);
         }
 
-        public async Task<AppUser> GetUserByIdASync(int id)
+        public async Task<AppUser> GetUserByIdAsync(int id)
         {
             return await context.Users.FindAsync(id);
         }
