@@ -21,8 +21,7 @@ export class MembersService {
         params = params.append('minAge', userParams.minAge);
         params = params.append('maxAge', userParams.maxAge);
         params = params.append('gender', userParams.gender);
-
-        console.log(userParams.gender);
+        params = params.append('orderBy', userParams.orderBy);
 
         //
         // to get the entire response (not just the body), an extra param is added to the get method
