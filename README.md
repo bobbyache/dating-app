@@ -577,8 +577,12 @@ Lastly take note of the `observe: 'response'` which ensures that the entire resp
 
 The `getPaginatedResults()` uses TypeScript generics in order create a reusuable paginated get request in Angular code.
 
+See also how the paged results are cached by using `Object.values(...)` on the parameter values.
+
 # Time Ago
 
 - [ngx-timeago](https://www.npmjs.com/package/ngx-timeago)
 
 Use `npm install ngx-timeago --legacy-peer-deps` to use a pipe to convert a date to "Time ago" to get the last active etc.
+
+Note how `member.lastActive + 'Z'` lets the client know the time is UTC which means that the browser automatically adds our offset to the original time to display it in relation to our current local time.

@@ -12,10 +12,14 @@ import { UserParams } from '../_models/usersParams';
 export class MembersService {
     baseUrl = environment.apiUrl;
     members: Member[] = [];
+    memberCache = new Map();
 
     constructor(private http: HttpClient) {}
 
     getMembers(userParams: UserParams) {
+        const response = this.memberCache.get(Object.values(userParams).join('-'));
+        if (response) return of(response);
+
         let params = this.getPaginationHeaders(userParams.pageNumber, userParams.pageSize);
 
         params = params.append('minAge', userParams.minAge);
@@ -27,7 +31,12 @@ export class MembersService {
         // to get the entire response (not just the body), an extra param is added to the get method
         // to "observe" the entire response. The params are passed as query parameters.
         // when the response comes back, the pagination infom must be extracted from the header.
-        return this.getPaginatedResults<Member[]>(this.baseUrl + 'users', params)
+        return this.getPaginatedResults<Member[]>(this.baseUrl + 'users', params).pipe(
+            map(response => {
+                this.memberCache.set(Object.values(userParams).join('-'), response)
+                return response;
+            })
+        );
     }
 
     private getPaginatedResults<T>(url: string, params: HttpParams) {
