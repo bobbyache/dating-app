@@ -1,3 +1,8 @@
+# Questions/Thoughts to be Considered
+
+- `/users/set-main-photo` should surely be a `PATCH` rather than a `PUT` to be dogmatically RESTfull? 
+- Investigate paging and its application using HATEOS and RESTfull approaches. 
+
 # Setup instructions
 
 ### Installing Node and Angular
@@ -496,3 +501,67 @@ Use `npm install ng2-file-upload@next` but use `npm install ng2-file-upload@next
 "ng2-file-upload": "2.0.0-3",
 ```
 
+# Pagination
+
+- We should always page search results.
+- Helps avoid performance problems.
+- Page size should be limited.
+- Parameters are passed by query string.
+
+```
+https://localhost:5001/api/users?pageNumber=1&pageSize=5
+```
+
+The following is a EF pattern that pages and returns an `IQueryable<User>`.
+
+```csharp
+var query = context.Users
+    .Where(x = x.Gender == gender)
+    .OrderBy(x => x.UserName)
+    .Take(5)
+    .Skip(5)
+    // optional as it will return a type of IQueryable.
+    .AsQueryable()
+;
+```
+
+Do not want to do this for all our queries. We'd rather create a reusable `PagedList`. Take note of how this inherits from `List<T>` and makes use of generics in order to return a `PagedList` that encapsulates paging against entity tables in the database.
+
+This is used in conjunction with the `PaginationHeader` which will pass back pagination information in HTTP responses (where applicable) from the Web API search methods.
+
+To make this easier to use within a response an extension method (`HttpExtensions.AddPaginationHeader()`) is created to extend the `HttpResponse` class. Importantly the API must explicitly allow the client access to the Pagination header otherwise the default CORS policy will be to deny the client access to the information within this header.
+
+The `UserParams` is a class that will be instantiated when the endpoint is hit (based on query parameter values) and then used by the repository method that returns the list of members (or users). It contains paging information and a little defensive logic (in order to ensure that the page size does not exceed a certain number) so that the client can request paged user data that it needs.
+
+The resulting repository interface method therefore looks like this.
+
+```csharp
+    Task<PagedList<MemberDto>> GetMembersAsync(UserParams userParams);
+```
+
+The resulting Entity Framework query implementation of that method therefore looks like this.
+
+```csharp
+    public async Task<PagedList<MemberDto>> GetMembersAsync(UserParams userParams)
+    {
+        var query = context.Users
+            .ProjectTo<MemberDto>(mapper.ConfigurationProvider)
+            .AsNoTracking();
+
+        return await PagedList<MemberDto>.CreateAsync(query, userParams.PageNumber, userParams.PageSize);
+    }
+```
+The `UserParams` are passed via a query string from the response to the controller method. Note how the `PaginationHeader` is added to the response before the the reponse is sent back to the client.
+
+```csharp
+    [HttpGet]
+    public async Task<ActionResult<IEnumerable<MemberDto>>> GetUsers([FromQuery]UserParams userParams)
+    {
+        var users = await userRepository.GetMembersAsync(userParams);
+
+        Response.AddPaginationHeader(new PaginationHeader(users.CurrentPage, users.PageSize,
+            users.TotalCount, users.TotalPages));
+
+        return Ok(users);
+    }
+```
