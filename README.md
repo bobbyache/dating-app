@@ -574,3 +574,5 @@ The `UserParams` are passed via a query string from the response to the controll
 Have a look at the `member.service.ts` class to see how pagination is implemented in the Angular service. Specifically the `getMembers()` method. Note that `Pagination` and `PaginatedResult<T>` have been added to Angular to manage the results returned from the server. Note also how the `HttpParams` are sent with the request and the immutability of the `params` object.
 
 Lastly take note of the `observe: 'response'` which ensures that the entire response (and not just the body) are made available through the observable to allow us to get to the headers. One can not typically access these headers unless the API has made the accessible via the `Access-Control-Expose-Headers` header.
+
+The `getPaginatedResults()` uses TypeScript generics in order create a reusuable paginated get request in Angular code.
