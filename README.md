@@ -440,6 +440,8 @@ Have a look at the `MembersService` to see how in-memory client-side caching is 
 
 Take a look at how the `getMember()` takes advantage of the `memberCache` to retrieve members already in memory by making clever use of the `reduce()` method.
 
+The filters above the matches gallery listing are also cached (remembered) with the `userParams` in the `MemberService`. The reason why this works is that the service outlasts the component which is destroyed every time you navigate away from it. The `getUserParams`, `setUserParams`, and `resetUserParams` manage the filters from within the service.
+
 # Storing Images
 
 Storing images as Large Binary Ojbects (BLOBs) is not efficient. Databases are not meant for this. File systems are optimized for storing files so storing files on the web server. However, this is not a good idea if you need to scale in the future.
