@@ -22,7 +22,7 @@ Need to install bootstrap and this can be done manually with `npm install ngx-bo
 rm -rf node_modules && npm i --legacy-peer-deps
 ```
 
-### Creating .NET Core Projects
+# Creating .NET Core Projects
 
 Use `dotnet new list` to see a list of project templates you can use to create .NET projects.
 
@@ -165,8 +165,6 @@ These files SHOULD NOT be saved to source control (especially the production set
 - [Prettier - Code formatter](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode)
 - [SQLite](https://marketplace.visualstudio.com/items?itemName=alexcvzz.vscode-sqlite)
 
-
-
 # Productivity Tips
 - [Angular Bootstrap](https://ng-bootstrap.github.io/#/home) - You'll generally following the manual install instructions, add the styles to `angular.json`.
 - [json2ts](http://json2ts.com/) - Generates TypeScript interfaces from JSON.
@@ -188,6 +186,64 @@ npm ERR! this command with --force, or --legacy-peer-deps
 npm ERR! to accept an incorrect (and potentially broken) dependency resolution.
 ```
 Run the install again like this `npm install @kolkov/ngx-gallery --legacy-peer-deps` as the author might not have got around to updating his component to say that is ok to use Angular XX. Can use one or two of the suggested switches.
+
+
+# Debugging the Client and API (Issues and solution)
+
+
+There is an issue trying to point to a sub-folder to run Angular. It doesn't matter whether you try and set the `webRoot` correctly it does not seem to work.
+
+- This link [looked promising but doesn't seem to work](https://stackoverflow.com/questions/40443217/debug-with-visual-studio-code-not-working).
+- This is the [official link](https://code.visualstudio.com/docs/editor/debugging) but the instructions to not appear to work.
+
+```json
+        {
+            "name": "ng serve",
+            "type": "chrome",
+            "request": "launch",
+            "preLaunchTask": "npm: start",
+            "url": "http://localhost:4200/",
+            "webRoot": "${workspaceRoot}/client"
+          },
+```
+
+Problem is that the `webRoot` doesn't seem to work and you never seem to point to the right folder.
+
+However, if you open another VS Code  instance in the sub-folder (in the client folder in this example), then you are able to use the `.vscode` `launch.json` settings to properly debug your Angular App.
+
+However this means you will need to have two instances open.
+
+## Solution
+
+The solution is to create a workspace. Your project structure has the following files so the solution is to add the API folder and the client folder to a workspace rather than opening the parent folder.
+Save the workspace file in the parent folder.
+
+```
+C:.
++---API
+|   +---.vscode
++---client
+|   +---.vscode
++---dating-app.code-workspace
+|
+
+```
+
+### API
+At some point VS Code will ask if you want to set up debugging configuration for hte API. However, you can do this manually by `CTRL+SHIFT+P` and choosing "Debug: Add configuration...". When you choose to launch your API you'll get an `ERR_EMPTY_RESPONSE` but this is simply because there is nothing at the root and your page doesn't open like on `dotnet watch ...` at the Swagger route.
+
+You can still hit an endpoint from Postman with a breakpoint and it will break in your API code.
+
+### Client
+
+You'll also be able to debug your Angular code by simply select it from the debugging options as well as test your code using Jasmine.
+
+This can be a little fickle as it sometimes hangs but it appears that you have to kill it in the "debug" list and and the kill the "npm start" process which appears to remain running in your VS Code terminal list.
+
+It appears that if you shut down the browser windo instead of killing the process in the "debug list" the next time you try and debug the angular app you end up with a white hanging screen.
+
+> Note: Good idea to move the corresponding files that no long belong in the parent folder into their respective folders.
+
 
 # CORS considerations
 
@@ -590,3 +646,70 @@ See also how the paged results are cached by using `Object.values(...)` on the p
 Use `npm install ngx-timeago --legacy-peer-deps` to use a pipe to convert a date to "Time ago" to get the last active etc.
 
 Note how `member.lastActive + 'Z'` lets the client know the time is UTC which means that the browser automatically adds our offset to the original time to display it in relation to our current local time.
+
+# Entity Framework Many-to-Many Relationships
+
+When an `AppUser` can like many `AppUser`s and can be liked by many `AppUser`s we have a many to many relationship.
+
+Self referencing many-to-many's are not working fantastically. So the workaround is to explicitly create a join table (`UserLike`):
+
+| SourceUserId | LikedUserId |
+| --- | --- |
+|1 | 7 |
+|1 | 8 |
+
+In this case the Fluent API is being used to implement this configuration.
+
+An `AppUser` has one `SourceUser` with many `LikedUsers`.
+An `AppUser` has one `LikedUser` with many `LikedByUsers`.
+
+The later versions of Entity Framework (from v 5) allows for the creation of a many-to-many relationship using convention such as:
+
+```csharp
+public class AppUser
+{
+    ...
+    public List<AppUser> LikedByUsers { get; set; }
+    public List<AppUser> LikedUsers { get; set; }
+}
+```
+
+This approach can become quite confusing and the database table that is created (`AppUserAppUser`) is not very intuitive.
+
+Therefore, the approach that is used here is the explicit many-to-many approach (an older approach). A `UserLike` entity is created to be the bridge table.
+
+```csharp
+public class AppUser
+{
+    ...
+    public List<UserLike> LikedByUsers { get; set; }
+    public List<UserLike> LikedUsers { get; set; }
+}
+```
+
+Add in the many-to-many relationship using fluent assertion ends up being like this. Please note that for Sqlite (and just about every other database except for SQL Server) you'll use `DeleteBehavior.Cascade` for both sides. For SQL Server you must use `DeleteBehavior.NoAction` for one or the other of the relationships.
+
+```csharp
+    protected override void OnModelCreating(ModelBuilder builder)
+    {
+        base.OnModelCreating(builder);
+
+        builder.Entity<UserLike>()
+            .HasKey(k => new { k.SourceUserId, k.TargetUserId });
+
+        //
+        // If you are using SQL Server you have to specify one of these
+        // to be "DeleteBehavior.NoAction" otherwise you'll get an error.
+        builder.Entity<UserLike>()
+            .HasOne(s => s.SourceUser)
+            .WithMany(l => l.LikedUsers)
+            .HasForeignKey(s => s.SourceUserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.Entity<UserLike>()
+            .HasOne(s => s.TargetUser)
+            .WithMany(l => l.LikedByUsers)
+            .HasForeignKey(s => s.TargetUserId)
+            .OnDelete(DeleteBehavior.Cascade);
+    }
+```
