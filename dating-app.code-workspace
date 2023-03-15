@@ -6,5 +6,13 @@
 		{
 			"path": "client"
 		}
-	]
+	],
+	"settings": {
+		"prettier.printWidth": 120,
+		"prettier.singleQuote": true,
+		"prettier.useTabs": false,
+		"prettier.tabWidth": 4,
+		"prettier.semi": true,
+		"prettier.bracketSpacing": true
+	}
 }
