@@ -18,6 +18,11 @@ export class NavComponent implements OnInit {
     ngOnInit(): void {}
 
     login() {
+        //
+        // TODO: (Rob) If you log out as a female and come in as a male you'll see the 
+        // the same male listing you saw before because we're remember the list.
+        // To fix this must inject memberService and over here, reset the user params.
+        // then you will get the right filter applied.
         this.accountService.login(this.model).subscribe({
             next: (_) => this.router.navigateByUrl('/members'),
         });
