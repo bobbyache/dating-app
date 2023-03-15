@@ -1,7 +1,8 @@
 # Questions/Thoughts to be Considered
 
 - `/users/set-main-photo` should surely be a `PATCH` rather than a `PUT` to be dogmatically RESTfull? 
-- Investigate paging and its application using HATEOS and RESTfull approaches. 
+- Investigate paging and its application using HATEOS and RESTfull approaches.
+- You have workspace settings for prettier (in the root repository folder), and you have a prettier file in the client folder. Experiment and see what takes preference what really needs to be set.
 
 # Setup instructions
 
