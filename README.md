@@ -3,6 +3,7 @@
 - `/users/set-main-photo` should surely be a `PATCH` rather than a `PUT` to be dogmatically RESTfull? 
 - Investigate paging and its application using HATEOS and RESTfull approaches.
 - You have workspace settings for prettier (in the root repository folder), and you have a prettier file in the client folder. Experiment and see what takes preference what really needs to be set.
+- "Likes" and "Liked by" is not implemented correctly. Feels as if the two should be two seperate use cases. Revisit the code and extract the two from each other.
 
 # Setup instructions
 
@@ -650,9 +651,17 @@ Note how `member.lastActive + 'Z'` lets the client know the time is UTC which me
 
 # Entity Framework Many-to-Many Relationships
 
+Although later versions of Entity Framework Core allows the developer to create many-to-many relationships without creating a "join" or "bridge" entity, the results are not always desireable. For instance, the table name and foreign key names can often look quite confusing.
+
+It is better to spend a bit of time creating the "join" entity in order for the developer to maintain control over naming conventions and this is the approach taken on this project.
+
+For examples of how this is done, look at "Likes" and "Messages".
+
+## Likes
+
 When an `AppUser` can like many `AppUser`s and can be liked by many `AppUser`s we have a many to many relationship.
 
-Self referencing many-to-many's are not working fantastically. So the workaround is to explicitly create a join table (`UserLike`):
+As stated above, self referencing many-to-many's are possible but do not allow the programmer to retain control of things like table names and foreign keys and such. So the workaround is to explicitly create a join table (`UserLike`):
 
 | SourceUserId | LikedUserId |
 | --- | --- |
@@ -714,3 +723,28 @@ Add in the many-to-many relationship using fluent assertion ends up being like t
             .OnDelete(DeleteBehavior.Cascade);
     }
 ```
+
+## Messages
+
+A similar thing takes place with messages.
+
+### Restrict Delete
+
+See `DataContext`.
+
+```csharp
+        builder.Entity<Message>()
+            .HasOne(m => m.Recipient)
+            .WithMany(m => m.MessagesReceived)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.Entity<Message>()
+            .HasOne(m => m.Sender)
+            .WithMany(m => m.MessagesSent)
+            .OnDelete(DeleteBehavior.Restrict);
+```
+
+And on this occasion, the developer wants to restrict deletion because the message should not be deleted.
+If the sending user removes their profile. The recipient of the message should still be able to see that message.
+
+It shouldn't be deleted just because the user has deleted their profile.

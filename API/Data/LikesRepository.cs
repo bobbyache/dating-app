@@ -20,6 +20,11 @@ namespace API.Data
             return await context.Likes.FindAsync(SourceUserId, targetUserId);
         }
 
+        //
+        // TODO: (Rob) Not sure if I like this... we're adding more than one responsibility to
+        // this method. It should be that "liked" and "liked by" should be two methods... think
+        // the instructor just wanted to show some jazzy EF code. Revisit this and realize it really
+        // is two use cases.
         public async Task<PagedList<LikeDto>> GetUserLikes(LikesParams likesParams)
         {
             var users = context.Users.OrderBy(u => u.Username).AsQueryable();
