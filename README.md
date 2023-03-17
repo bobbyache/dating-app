@@ -4,6 +4,7 @@
 - Investigate paging and its application using HATEOS and RESTfull approaches.
 - You have workspace settings for prettier (in the root repository folder), and you have a prettier file in the client folder. Experiment and see what takes preference what really needs to be set.
 - "Likes" and "Liked by" is not implemented correctly. Feels as if the two should be two seperate use cases. Revisit the code and extract the two from each other.
+- DataContext should also be an interface?
 
 # Setup instructions
 
