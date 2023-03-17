@@ -638,7 +638,7 @@ Have a look at the `member.service.ts` class to see how pagination is implemente
 
 Lastly take note of the `observe: 'response'` which ensures that the entire response (and not just the body) are made available through the observable to allow us to get to the headers. One can not typically access these headers unless the API has made the accessible via the `Access-Control-Expose-Headers` header.
 
-The `getPaginatedResults()` uses TypeScript generics in order create a reusuable paginated get request in Angular code.
+The `getPaginatedResult()` uses TypeScript generics in order create a reusuable paginated get request in Angular code. The `getPaginationHeaders()` method appends the pagination information to the query parameters of the request. These two functions can be found in `_services/paginationHelper.ts`. 
 
 See also how the paged results are cached by using `Object.values(...)` on the parameter values.
 
