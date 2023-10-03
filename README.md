@@ -25,6 +25,43 @@ Need to install bootstrap and this can be done manually with `npm install ngx-bo
 rm -rf node_modules && npm i --legacy-peer-deps
 ```
 
+### Updating Angular to another version
+
+> Best to do this in a git bash console. Also before you do the update it might be a good idea to do a clean `node_modules` install by doing the following:
+
+```bash
+rm -rf node_modules
+npm i --legacy-peer-deps
+```
+
+Do an `npm run test` and a `npm start` or `npm build` to ensure everything is in order.
+
+It's important to note that you can only update from one major version of Angular to another major version of Angular. So if you're on verson `14.x.x` you must first update to `15.x.x` before you can continue with an update to let's say, `16.x.x`. Often if you follow the update process in this way it does a pretty good job of doing things for you.
+
+In order to see what needs to be done simply do a `ng update`. This will analyze your `package.json` and give you  the next course of action.
+
+```bash
+ng update
+```
+
+There will be a list of updates. You'll have to update them one by one and commit each one which is not ideal!
+
+There is a trick, you can update all the recommendations in one go following this pattern. If your repository is not clean its going to fail so you have to commit any changes before continuing.
+
+In this situation, you may have to fix some issues manually. Note, there is a gotcha here. You should do this in git bash if you're on Windows. It is much quicker as it executes in a single action. If you try and do the same thing in PowerShell its going to do it once after the other... after each component you'll have to commit or otherwise it will complain that the repository is not clean.
+
+```bash
+ng update @angular/cli@15 @angular/core@15 ngx-toastr
+```
+Sometimes you might have to use:
+
+```bash
+ng update @angular/cli@15 @angular/core@15 ngx-toastr --force
+```
+
+Keep moving from major version to major version until you get to where you need to upgrade to.
+
+
 # Creating .NET Core Projects
 
 Use `dotnet new list` to see a list of project templates you can use to create .NET projects.
