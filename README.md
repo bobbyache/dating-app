@@ -93,7 +93,7 @@ The commands that you can use are also listed on the [official nuget](https://ww
 
 ### Updating the database
 
-Before running the `dotnet ef database update` it will be useful to make sure your solutions builds with a `dotnet build`.
+Before running the `dotnet-ef database update` it will be useful to make sure your solutions builds with a `dotnet build`.
 
 # Use HTTPS (for Angular)
 
@@ -197,7 +197,7 @@ Run the install again like this `npm install @kolkov/ngx-gallery --legacy-peer-d
 There is an issue trying to point to a sub-folder to run Angular. It doesn't matter whether you try and set the `webRoot` correctly it does not seem to work.
 
 - This link [looked promising but doesn't seem to work](https://stackoverflow.com/questions/40443217/debug-with-visual-studio-code-not-working).
-- This is the [official link](https://code.visualstudio.com/docs/editor/debugging) but the instructions to not appear to work.
+- This is the [official link](https://code.visualstudio.com/docs/editor/debugging) but the instructions do not appear to work.
 
 ```json
         {
@@ -233,7 +233,7 @@ C:.
 ```
 
 ### API
-At some point VS Code will ask if you want to set up debugging configuration for hte API. However, you can do this manually by `CTRL+SHIFT+P` and choosing "Debug: Add configuration...". When you choose to launch your API you'll get an `ERR_EMPTY_RESPONSE` but this is simply because there is nothing at the root and your page doesn't open like on `dotnet watch ...` at the Swagger route.
+At some point VS Code will ask if you want to set up debugging configuration for the API. However, you can do this manually by `CTRL+SHIFT+P` and choosing "Debug: Add configuration...". When you choose to launch your API you'll get an `ERR_EMPTY_RESPONSE` but this is simply because there is nothing at the root and your page doesn't open like on `dotnet watch ...` at the Swagger route.
 
 You can still hit an endpoint from Postman with a breakpoint and it will break in your API code.
 
