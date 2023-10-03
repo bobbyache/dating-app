@@ -61,6 +61,39 @@ ng update @angular/cli@15 @angular/core@15 ngx-toastr --force
 
 Keep moving from major version to major version until you get to where you need to upgrade to.
 
+Now your main Angular stuff has been updated, but there are still packages that will now be outdated. In order to find out what they are, run `npm outdated`. This will give you a list of outdated packages. The goal is to get all these packages updated.
+
+One can attempt to update all the packages one by one but that's no fun. Rather install a package globally called `npm-check-updates` and use it to update them all in bulk. If one of your components aren't updated for the next Angular version you may need to force it with the `f`
+
+```bash
+# Get a list of outdated packages
+npm outdated
+
+# Install ncu and use it to update all packages
+npm i -g npm-check-updates && ncu -u && npm i
+# or
+npm i -g npm-check-updates && ncu -u && npm i -f
+```
+
+Sometimes the outdated version table is not totally accurate. In this case if something isn't compatible one might need to go to the vendor package site and look to see what version is compatible with the Angular version just updated to. One it is known what version is compatible one can force an install of that package:
+
+```bash
+npm install ngx-bootstrap@11 -f
+```
+
+In your case you had to fix another problem with the list shown by `npm outdated` which appeared to want typescript 5.2.2 which then resulted in an error: 
+
+```
+Error: Failed to initialize Angular compilation - The Angular Compiler requires TypeScript >=4.9.3 and <5.2.0 but 5.2.2 was found instead.
+```
+
+When you did a `ng version` you noticed that the current version was 5.2.2. Fixed it with this (forced it to a working version):
+
+```bash
+npm install --save-dev typescript@4.9.5 -f
+```
+
+> Note: If your `node_modules` packages are not installed you'll get a couple of `<error>` version numberes for packages when you run an `ng version`. Once you've successfully installed the packages with an `npm i` these errors should go away. Note also that you should have both a global and dev version of `ng`. Versions should also match.
 
 # Creating .NET Core Projects
 
