@@ -245,9 +245,11 @@ These files SHOULD NOT be saved to source control (especially the production set
 
 # UI Components and Libraries
 
-### ngx-gallery
-- https://www.npmjs.com/package/@kolkov/ngx-gallery
-- `npm install @kolkov/ngx-gallery`
+### ng-gallery
+
+- Replaces the old `@kolkov/ngx-gallery` [gallery](https://www.npmjs.com/package/@kolkov/ngx-gallery) component.
+- [Official Website](https://ngx-gallery.netlify.app/#/) for `ng-gallery`.
+- `npm i ng-gallery @angular/cdk`
 
 ### ngx-spinner
 - https://www.npmjs.com/package/ngx-spinner
