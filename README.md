@@ -27,6 +27,10 @@ rm -rf node_modules && npm i --legacy-peer-deps
 
 ### Updating Angular to another version
 
+- Before beginning an update journey it is useful to refresh yourself on [Node.js Semantic Versioning](https://docs.npmjs.com/about-semantic-versioning).
+- Ensure you have access to the [version compatibility page](https://angular.io/guide/versions).
+- Ensure you have the [Angular Update Guide](https://angular.io/guide/versions) page open.
+
 > Best to do this in a git bash console. Also before you do the update it might be a good idea to do a clean `node_modules` install by doing the following:
 
 ```bash
@@ -150,7 +154,13 @@ Ensure to install the following two packages:
 - `Microsoft.EntityFrameworkCore.Sqlite`
 - `Microsoft.EntityFrameworkCore.Design`
 
+### SQLite Extension
 Install the SQLite extension by `alexcvzz` to view your database. You'll open the command palatte with CTRL+SHIFT+P... And choose the option to open a database. Your database will show up in the list if you've already done a `dotnet ef database update` and you'll be able to access it in your explore pane. Look for SQLite Explorer.
+
+Take a look at `appsettings.Development.json` to see how the connection string is added.
+
+Open the SQLite explorer by using the `CTRL+SHIFT+P` shortcut. Pick our database. You'll see a pane appear under your explorer pane in VS Code.
+- Righ click on a table to view, query, etc.
 
 ### Data Migrations
 
