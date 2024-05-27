@@ -831,3 +831,9 @@ And on this occasion, the developer wants to restrict deletion because the messa
 If the sending user removes their profile. The recipient of the message should still be able to see that message.
 
 It shouldn't be deleted just because the user has deleted their profile.
+
+# TypeScript
+
+- The goddamnit or bang operator usage patterns, see:
+    - `client\src\app\_resolvers\member-detailed.resolver.ts`
+    - `client\src\app\members\member-detail\member-detail.component.ts`
