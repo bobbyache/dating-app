@@ -8,6 +8,27 @@
 
 # Setup instructions
 
+### Current Versioning
+
+```
+PS C:\Code\bobbyache\dating-app> npm ls -g
+
+C:\Program Files\nodejs -> .\
+├── @angular/cli@16.2.9
+├── azure-functions-core-tools@4.0.5095
+├── azurite@3.26.0
+├── corepack@0.10.0
+├── jest@29.7.0
+├── ngx-toastr@17.0.2
+├── npm-check-updates@16.14.4
+└── npm@8.11.0
+
+Angular CLI: 16.2.9
+Node: 16.16.0
+Package Manager: npm 8.11.0
+OS: win32 x64
+```
+
 ### Installing Node and Angular
 
 Originally setup via course using node v16.16.0 and Angular 14.2.10 using the following commands:
@@ -166,6 +187,7 @@ Open the SQLite explorer by using the `CTRL+SHIFT+P` shortcut. Pick our database
 
 - Use `dotnet tool install --global dotnet-ef --version` in order to install `dotnet-ef`. You'd normally want to install this globally unless you need a specific version for a specific project.
 - Use `dotnet tool list` to get the listing of tools. This will display the `dotnet-ef` version if one is installed. Use `dotnet tool list -g` to see the global tool list. `dotnet tool list --local` to list all locally installed tools.
+- To update: `dotnet tool update --local dotnet-ef --version 8.0.3 `.
 
 For whatever reason, you may wish to use a specific version of dotnet-ef for a project (perhaps you’re learning something on Udemy). You can set up a manifest file for your solution. Take a look at [this article](https://learn.microsoft.com/en-us/dotnet/core/tools/local-tools-how-to-use). When you create a new tool manifest it will create a file here: .config\dotnet-tools.json and add your version to it.
 
