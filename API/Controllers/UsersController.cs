@@ -23,7 +23,6 @@ public class UsersController : BaseApiController
         this.userRepository = userRepository;
     }
 
-    [Authorize(Roles = "Admin")]
     [HttpGet]
     public async Task<ActionResult<IEnumerable<MemberDto>>> GetUsers([FromQuery]UserParams userParams)
     {
@@ -44,7 +43,6 @@ public class UsersController : BaseApiController
         return Ok(users);
     }
 
-    [Authorize(Roles = "Member")]
     [HttpGet("{username}")]
     public async Task<ActionResult<MemberDto>> GetUser(string username)
     {
