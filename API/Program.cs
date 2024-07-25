@@ -55,10 +55,11 @@ try
     // Will automatically create the database if it doesn't exist
     var context = services.GetRequiredService<DataContext>();
     var userManager = services.GetRequiredService<UserManager<AppUser>>();
+    var roleManager = services.GetRequiredService<RoleManager<AppRole>>();
     await context.Database.MigrateAsync();
 
     // Seed with initial data (if no data exists)
-    await Seed.SeedUsers(userManager);
+    await Seed.SeedUsers(userManager, roleManager);
 }
 catch (Exception ex)
 {
