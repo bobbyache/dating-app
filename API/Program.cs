@@ -55,7 +55,7 @@ try
     await context.Database.MigrateAsync();
 
     // Seed with initial data (if no data exists)
-    await Seed.SeedUsers(context);
+    // await Seed.SeedUsers(context);
 }
 catch (Exception ex)
 {
