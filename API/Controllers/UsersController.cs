@@ -27,7 +27,7 @@ public class UsersController : BaseApiController
     public async Task<ActionResult<IEnumerable<MemberDto>>> GetUsers([FromQuery]UserParams userParams)
     {
         var currentUser = await userRepository.GetUserByUsernameAsync(User.GetUsername());
-        userParams.CurrentUsername = currentUser.Username;
+        userParams.CurrentUsername = currentUser.UserName;
 
         // Default to the opposite sex if gender is not provided.
         if (string.IsNullOrEmpty(userParams.Gender))
@@ -92,7 +92,7 @@ public class UsersController : BaseApiController
         // ... and we send back the newly created resource url in the Location header.
         if (await userRepository.SaveAllAsync())
         {
-            return CreatedAtAction(nameof(GetUser), new { username = user.Username }, mapper.Map<PhotoDto>(photo));
+            return CreatedAtAction(nameof(GetUser), new { username = user.UserName }, mapper.Map<PhotoDto>(photo));
         }
 
         return BadRequest("Problem adding photo");

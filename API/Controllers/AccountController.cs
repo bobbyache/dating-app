@@ -28,20 +28,16 @@ public class AccountController : BaseApiController
     {
         if (await UserExists(registerDto.Username)) return BadRequest("Username is taken");
 
-        var user = mapper.Map<AppUser>(registerDto);
+        var user = mapper.Map<AppUser>(registerDto);       
 
-        using var hmac = new HMACSHA512();
-
-        user.Username = registerDto.Username.ToLower();
-        user.PasswordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(registerDto.Password));
-        user.PasswordSalt = hmac.Key;
+        user.UserName = registerDto.Username.ToLower();
 
         context.Users.Add(user);
         await context.SaveChangesAsync();
 
         return new UserDto
         {
-            Username = user.Username,
+            Username = user.UserName,
             Token = tokenService.CreateToken(user),
             PhotoUrl = user.Photos.FirstOrDefault(x => x.IsMain)?.Url,
             KnownAs = user.KnownAs,
@@ -52,19 +48,12 @@ public class AccountController : BaseApiController
     [HttpPost("login")]
     public async Task<ActionResult<UserDto>> Login(LoginDto loginDto)
     {
-        var user = await context.Users.Include(u => u.Photos).SingleOrDefaultAsync(usr => usr.Username == loginDto.Username.ToLower());
-        if (user is null) return Unauthorized("Invalid user");
-
-        using var hmac = new HMACSHA512(user.PasswordSalt);
-        var computedHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(loginDto.Password));
-        for (int i = 0; i < computedHash.Length; i++)
-        {
-            if (computedHash[i] != user.PasswordHash[i]) return Unauthorized("Invalid password");
-        }
+        var user = await context.Users.Include(u => u.Photos).SingleOrDefaultAsync(usr => usr.UserName == loginDto.Username.ToLower());
+        if (user is null) return Unauthorized("Invalid username");
 
         return new UserDto
         {
-            Username = user.Username,
+            Username = user.UserName,
             Token = tokenService.CreateToken(user),
             PhotoUrl = user.Photos.FirstOrDefault(x => x.IsMain)?.Url,
             KnownAs = user.KnownAs,
@@ -73,5 +62,5 @@ public class AccountController : BaseApiController
     }
 
 
-    private async Task<bool> UserExists(string username) => await context.Users.AnyAsync(usr => usr.Username.ToLower() == username.ToLower());
+    private async Task<bool> UserExists(string username) => await context.Users.AnyAsync(usr => usr.UserName.ToLower() == username.ToLower());
 }
