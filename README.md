@@ -375,7 +375,7 @@ Once this is done, the `Access-Control-Allow-Origin` header will be sent with ev
 
 # Security
 
-If you want to know how to log in with any given user take a look at the `Seed.cs` class to see what the generated password is. It should be `Pa$$w0rd`.
+If you want to know how to log in with any given user take a look at the `Seed.cs` class to see what the generated password is. It should be `Pa$$w0rd`. Otherwise, try "password".
 
 Its always good to store the password hash as opposed to a password. This is a one way encryption method so one cannot decrypt back from the password to the hash. However this is not enough because if a user uses a weak well known password the hash will be recognisable and if the database is compromized and the attacker notices that Jack and Jill have the same hash and that hash maps back to a well known password online the attacker can use that password to gain access to both user's account.. Online there are dictionaries of hashes that map back to commonly used passwords based on common algorithms used to hash them. Salting protects against [dictionary attacks](https://en.wikipedia.org/wiki/Dictionary_attack).
 
