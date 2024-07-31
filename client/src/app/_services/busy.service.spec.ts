@@ -2,7 +2,7 @@ import { TestBed } from "@angular/core/testing";
 import { BusyService } from "./busy.service";
 import { NgxSpinnerService } from "ngx-spinner";
 
-fdescribe('BusyService', () => {
+describe('BusyService', () => {
     let service: BusyService;
     let spinnerServiceSpy: any;
 
