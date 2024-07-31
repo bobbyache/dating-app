@@ -7,13 +7,14 @@ import * as testData from "../_testdata/users-and-roles.json";
 import { User } from "../_models/user";
 
 /*
-
     HttpClient - will make actual calls. Rather use the testing module. Has all the same methods
     as the HttpClient but will mock requests and return test data which will allow us to test
     certain things.
 
     HttpTestingController - allows us to make assertions against the request once executed.
 */
+
+// TODO: Test to cover updateUserRoles
 
 describe('MembersService', () => {
     let httpClient: HttpClient;
@@ -57,7 +58,7 @@ describe('MembersService', () => {
             httpTestingController.verify();
         });
 
-        it('should expect receive content', () => {
+        it('should expect to receive content', () => {
             // Important. You must first "import" into mockData before you can start using testData.
             // Once you have "imported" the JSON, you can then access its data property as an array.
             const mockData = testData;
