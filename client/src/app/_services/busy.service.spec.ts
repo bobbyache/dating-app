@@ -2,6 +2,14 @@ import { TestBed } from "@angular/core/testing";
 import { BusyService } from "./busy.service";
 import { NgxSpinnerService } from "ngx-spinner";
 
+/*
+    Use a spy to test the busy() and idle() functions.
+    Couple of gotchas you always run into like 'expected spy but got..'. Be very careful and make sure that
+    your literal strings are in fact, methods on the object.
+*/
+
+// TODO: Test to check that the spinner UI widget is visible in the DOM when spinning, invisible when idle.
+
 describe('BusyService', () => {
     let service: BusyService;
     let spinnerServiceSpy: any;
