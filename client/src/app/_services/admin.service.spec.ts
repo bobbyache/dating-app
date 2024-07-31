@@ -1,7 +1,7 @@
 import { TestBed } from "@angular/core/testing";
 import { HttpClientTestingModule, HttpTestingController } from "@angular/common/http/testing";
 import { AdminService } from "./admin.service";
-import { HttpClient } from "@angular/common/http";
+import { HttpClient, HttpErrorResponse } from "@angular/common/http";
 import { environment } from '../../environments/environment';
 import * as testData from "../_testdata/users-and-roles.json";
 import { User } from "../_models/user";
@@ -12,12 +12,15 @@ import { User } from "../_models/user";
     certain things.
 
     HttpTestingController - allows us to make assertions against the request once executed.
+    TODO: See Udemy Angular Testing Masterclass at this lecture:
+        https://www.udemy.com/course/angular-testing-course/learn/lecture/14512728#overview
+    Shows how you can use a Partial<User> to update specific fields. May want to put it into effect
+    somewhere else.
 */
 
 // TODO: Test to cover updateUserRoles
 
 describe('MembersService', () => {
-    let httpClient: HttpClient;
     let httpTestingController: HttpTestingController
     let adminService: AdminService
 
@@ -31,7 +34,6 @@ describe('MembersService', () => {
             ]
         })
 
-        httpClient = TestBed.inject(HttpClient);
         adminService = TestBed.inject(AdminService);
         httpTestingController = TestBed.inject(HttpTestingController);
     });
@@ -41,6 +43,7 @@ describe('MembersService', () => {
     });
 
     describe('when fetching users with roles', () => {
+
         it('should expect a single call to be made', () => {
             adminService.getUsersWithRoles().subscribe();
             // Expect the correct endpoint to be called once.
@@ -49,13 +52,7 @@ describe('MembersService', () => {
             // Assert that the request is a GET and has an auth header.
             expect(req.request.method).toEqual('GET');
             expect(req.request.headers.has('Authorization'));
-
-            // // Respond with mock data, causing Observable to resolve.
-            // // Subscribe callback asserts that correct data was returned.
-            // req.flush(testData);
-
-            // Assert they are no outstanding tests
-            httpTestingController.verify();
+            req.flush(testData);
         });
 
         it('should expect to receive content', () => {
@@ -90,6 +87,62 @@ describe('MembersService', () => {
             // gets back a specific array of users.
             const req = httpTestingController.expectOne(environment.apiUrl + 'admin/users-with-roles');
             req.flush(data);
+        });
+
+        afterEach(() => {
+            // Checks that no other HTTP requests are being made other than the expectOne().
+            // So if some additional request has been executed this will fail the test.
+            httpTestingController.verify();
+        });
+    });
+
+    describe('when updating user roles', () => {
+
+        it('should save the selected roles', () => {
+            const selectedRoles: string[] = ['Admin', 'Member'];
+
+            adminService.updateUserRoles('todd', selectedRoles)
+                .subscribe({
+                    next: roles => {
+                        expect(roles).toEqual(selectedRoles);
+                        expect(roles.length).toBe(2);
+                    }
+                });
+            
+            // Expect that a call is being made to update the roles for a specific uer.
+            const req = httpTestingController.expectOne(environment.apiUrl + 'admin/edit-roles/todd?roles=Admin,Member');
+
+            // TODO: Probably should be a PUT request, but would need to change this on the main branch and squash merge.
+            // Ensure this is a POST request with no content in the body
+            expect(req.request.method).toEqual('POST');
+            expect(req.request.body).withContext('Body of the POST request should have no content').toEqual({});
+
+            // Respond with mock data, causing observable to resolve.
+            // Assert that correct data is returned.
+            req.flush(selectedRoles);
+        });
+
+        it('should return an error if the update fails', () => {
+            const selectedRoles: string[] = ['Admin', 'Member'];
+
+            adminService.updateUserRoles('todd', selectedRoles)
+                .subscribe({
+                    next: () => fail('The update operation should have failed'),
+                    error: (err: HttpErrorResponse) => {
+                        expect(err.status).toBe(500);
+                    }
+                });
+
+            // Expect this call to fail with an error code 500. Indirectly ensure that the call has gone to the
+            // Observable's Error function. Probably more useful when working with something else.
+            const req = httpTestingController.expectOne(environment.apiUrl + 'admin/edit-roles/todd?roles=Admin,Member');
+            req.flush('Save course failed', {status:500, statusText: 'Internal Server Error'} );
+        });
+
+        afterEach(() => {
+            // Checks that no other HTTP requests are being made other than the expectOne().
+            // So if some additional request has been executed this will fail the test.
+            httpTestingController.verify();
         });
     });
 });
