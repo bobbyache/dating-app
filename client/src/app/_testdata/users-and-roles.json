@@ -1,3 +1,7 @@
-[
-    { "id": 6, "username": "todd", "roles": ["Member"], "token": "", "photoUrl": "", "knownAs": "", "gender": "string" }
-]
+{
+    "data": [
+        { "id": 1, "username": "todd", "roles": ["Member"], "token": "", "photoUrl": "", "knownAs": "toddie", "gender": "string" },
+        { "id": 2, "username": "lisa", "roles": ["Member","Admin"], "token": "", "photoUrl": "", "knownAs": "lisa12", "gender": "string" }
+    ]    
+}
+
