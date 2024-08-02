@@ -281,3 +281,44 @@ This is a tricky one. One might decide to import `CommonModule` or `BrowserModul
       NavComponent
   ]
 ```
+
+### Stubbing out the service and router dependency
+
+At this point all the services injected into the component under test are going to be real services. Usually, this is not a desired behavior. The component is being tested, not the services. One does not want to make real HTTP calls, one wants to know how the component will react based on state changed by certain interactions with these services. These interactions can be mocked or faked. There are many approaches to this and here is one in the official docs: [Provide service test doubles](https://v16.angular.io/guide/testing-components-scenarios#provide-service-test-doubles).
+
+> Note: At this point its noticed that although we inject the `ToastrService` in our code, we do not use it any where inside the component. The import can therefore be safely removed and the service can be removed from the constructor of the component.
+
+Let's create a stub for the `AccountsService`. Use `jasmine.createSpyObj`. Here is a [link to the official docs](https://jasmine.github.io/api/edge/Spy.html). Declare the stub as a `Partial` (mixin). Here are the [official docs](https://www.typescriptlang.org/docs/handbook/mixins.html) but [this is more readable](https://www.educative.io/answers/how-to-use-the-typescript-partial-type).
+
+Using the same technique, one can stub out the `Router`.
+
+```typescript
+fdescribe('NavComponent', () => {
+    ...
+    let accountServiceStub: Partial<AccountsService>;
+    let routerStub: Partial<Router>;
+
+    beforeEach(waitForAsync(() => {
+
+        accountServiceStub = jasmine.createSpyObj('AccountsService', ['login', 'logout']);
+        routerStub = jasmine.createSpyObj('Router', ['navigate']);
+
+        TestBed.configureTestingModule({
+            ...
+            providers: [
+                { provide: AccountsService, useValue: accountServiceStub },
+                { provide: AccountsService, useValue: accountServiceStub }
+            ]
+        })
+        .compileComponents()
+        .then(() => {
+          ...
+        });
+    }));
+
+    ...
+});
+```
+
+Go have a look at the component under test in the console. Notice how the `AccountService` and `Router` instances are now not real, they're Jasmine spy objects pretending to be the real thing.
+
