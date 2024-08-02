@@ -320,5 +320,3 @@ fdescribe('NavComponent', () => {
 });
 ```
 
-Go have a look at the component under test in the console. Notice how the `AccountService` and `Router` instances are now not real, they're Jasmine spy objects pretending to be the real thing.
-
