@@ -209,3 +209,75 @@ fdescribe('NavComponent', () => {
 ```
 
 > Not at this stage quite sure why the `AccountsService` is not required in a `providers` property. It may be that because it is injected in the root that its always available. The `ToastrService` and `Router` are provided through the `AppModule`.
+
+### Manually building up the fine grained dependencies.
+
+Remove all the imports for now. You'll end up with the following error when you try and run your test in the console.
+
+```
+Failed: Uncaught (in promise): NullInjectorError: R3InjectorError(DynamicTestModule)[AccountsService -> HttpClient -> HttpClient]: 
+  NullInjectorError: No provider for HttpClient!
+...
+```
+The second line is often the most useful one. Here it seems we have no provider for HttpClient. Lets add this dependency. Your test harness should now look something like this...
+
+```typescript
+import { ComponentFixture, TestBed, waitForAsync } from "@angular/core/testing";
+import { NavComponent } from "./nav.component";
+import { AppModule } from "../app.module";
+import { NoopAnimationsModule } from "@angular/platform-browser/animations";
+import { DebugElement } from "@angular/core";
+
+fdescribe('NavComponent', () => {
+    let component: NavComponent;
+    let fixture: ComponentFixture<NavComponent>;
+    let el: DebugElement;
+
+    beforeEach(waitForAsync(() => {
+        TestBed.configureTestingModule({
+            imports: [HttpClientModule],
+        })
+        .compileComponents()
+        .then(() => {
+            fixture = TestBed.createComponent(NavComponent);
+            component = fixture.componentInstance;
+            el = fixture.debugElement;
+        });
+    }));
+
+    it('should create the component', () => {
+        expect(component).toBeTruthy();
+        console.log('hello world');
+        console.log(component);
+    });
+});
+```
+
+That error has gone away. We're injecting an HttpClient. Now its another one.
+
+```
+Failed: Uncaught (in promise): NullInjectorError: R3InjectorError(DynamicTestModule)[ToastrService -> InjectionToken ToastConfig -> InjectionToken ToastConfig]: 
+  NullInjectorError: No provider for InjectionToken ToastConfig!
+...
+```
+Looks as if we're not injecting the ToastrService. Notice that the second line alos mentions a ToastConfig. Now in the `SharedModule` note that we added the following to the imports property.
+
+```typescript
+  ToastrModule.forRoot({
+      positionClass: 'toast-bottom-right',
+  }),
+```
+Now we get another error. What's interesting about this error is that it feels very "Angularish". There's mention of a pipe. Particularly the mention of the `async` pipe.
+
+```
+Failed: Uncaught (in promise): Error: NG0302: The pipe 'async' could not be found in the 'NavComponent' component. Verify that it is declared or imported in this module. Find more at https://angular.io/errors/NG0302
+Error: NG0302: The pipe 'async' could not be found in the 'NavComponent' component. Verify that it is declared or imported in this module. Find more at 
+```
+
+This is a tricky one. One might decide to import `CommonModule` or `BrowserModule` but the result will come back the same. The answer is that we are not declaring our component under test. Add the `NavComponent` to the declarations property of the `TestBed` and the problem goes away.
+
+```typescript
+  declarations: [
+      NavComponent
+  ]
+```
