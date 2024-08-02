@@ -13,7 +13,7 @@ import { AccountsService } from '../_services/accounts.service';
 export class NavComponent implements OnInit {
     model: any = {};
 
-    constructor(public accountService: AccountsService, private router: Router, private toastr: ToastrService) {}
+    constructor(public accountService: AccountsService, private router: Router) {}
 
     ngOnInit(): void {}
 
