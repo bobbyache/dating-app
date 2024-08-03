@@ -859,3 +859,11 @@ It shouldn't be deleted just because the user has deleted their profile.
 - The goddamnit or bang operator usage patterns, see:
     - `client\src\app\_resolvers\member-detailed.resolver.ts`
     - `client\src\app\members\member-detail\member-detail.component.ts`
+
+# SignalR
+
+### Install the npm package
+
+```
+npm install @microsoft/signalr --force
+```
