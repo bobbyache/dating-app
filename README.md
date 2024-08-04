@@ -754,6 +754,8 @@ Use `npm install ngx-timeago --legacy-peer-deps` to use a pipe to convert a date
 
 Note how `member.lastActive + 'Z'` lets the client know the time is UTC which means that the browser automatically adds our offset to the original time to display it in relation to our current local time.
 
+A better way to do this is to have the Server manage it. The frontend should never play around with date and time like this. See the `AutoMapperProfiles.cs` to see how this was eventually solved as EF has a short coming when it comes to fetching a UTC date and time from the database even though it was saved as a UTC date. Look for "Dealing with UTC date formats" in the Udemy course.
+
 # Entity Framework Many-to-Many Relationships
 
 Although later versions of Entity Framework Core allows the developer to create many-to-many relationships without creating a "join" or "bridge" entity, the results are not always desireable. For instance, the table name and foreign key names can often look quite confusing.
