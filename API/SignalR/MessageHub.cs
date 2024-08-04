@@ -14,13 +14,15 @@ public class MessageHub : Hub
     private readonly IMessageRepository messageRepository;
     private readonly IUserRepository userRepository;
     private readonly IMapper mapper;
+    private readonly IHubContext<PresenceHub> presenceHub;
 
     public MessageHub(IMessageRepository messageRepository, IUserRepository userRepository, 
-        IMapper mapper)
+        IMapper mapper, IHubContext<PresenceHub> presenceHub)
     {
         this.messageRepository = messageRepository;
         this.userRepository = userRepository;
         this.mapper = mapper;
+        this.presenceHub = presenceHub;
     }
 
     public override async Task OnConnectedAsync()
@@ -70,9 +72,23 @@ public class MessageHub : Hub
             var groupName = GetGroupName(sender.UserName, recipient.UserName);
             var group = await messageRepository.GetMessageGroup(groupName);
 
+            // Is this user is watching the message thread, the message will be read
+            // instantaneously
             if (group.Connections.Any(x => x.Username == recipient.UserName))
             {
                 message.DateRead = DateTime.UtcNow;
+            }
+            else
+            {
+                // Otherwise look at the presence tracker. Is the user online? The user may not
+                // be watching for messages but be online somewhere else on the website.
+                // If this is the case, find some other way to notify them (using the PresenceHub)
+                var connections = await PresenceTracker.GetConnectionsForUser(recipient.UserName);
+                if (connections != null)
+                {
+                    await presenceHub.Clients.Clients(connections).SendAsync("NewMessageReceived",
+                        new { username = sender.UserName, knownAs = sender.KnownAs } );
+                }
             }
             
             messageRepository.AddMessage(message);
