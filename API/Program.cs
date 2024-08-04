@@ -64,6 +64,10 @@ try
     var roleManager = services.GetRequiredService<RoleManager<AppRole>>();
     await context.Database.MigrateAsync();
 
+    // If the API restarts, remove all SignalR Group message connections.
+    // Raw SQL is the most optimal way to do this...
+    await context.Database.ExecuteSqlRawAsync("DELETE FROM [Connections]");
+
     // Seed with initial data (if no data exists)
     await Seed.SeedUsers(userManager, roleManager);
 }

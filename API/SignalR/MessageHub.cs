@@ -30,6 +30,7 @@ public class MessageHub : Hub
         var groupName = GetGroupName(Context.User.GetUsername(), otherUser);
 
         await Groups.AddToGroupAsync(Context.ConnectionId, groupName);
+        await AddToGroup(groupName);
 
         // On connection, and just having created a group, we'll get the message thread 
         // (for this user pair) via SignalR. 
@@ -37,11 +38,12 @@ public class MessageHub : Hub
         await Clients.Group(groupName).SendAsync("ReceiveMessageThread", messages);
     }
 
-    public override Task OnDisconnectedAsync(Exception exception)
+    public override async Task OnDisconnectedAsync(Exception exception)
     {
         // When a user disconnects from this hub by moving to another part of the application 
         // they will be automatically removed from any groups they are connected to on this hub.
-        return base.OnDisconnectedAsync(exception);
+        await RemoveFromMessageGroup();
+        await base.OnDisconnectedAsync(exception);
     }
 
     public async Task SendMessage(CreateMessageDto createMessageDto)
@@ -64,13 +66,20 @@ public class MessageHub : Hub
                 RecipientUsername = recipient.UserName,
                 Content = createMessageDto.Content
             };
+
+            var groupName = GetGroupName(sender.UserName, recipient.UserName);
+            var group = await messageRepository.GetMessageGroup(groupName);
+
+            if (group.Connections.Any(x => x.Username == recipient.UserName))
+            {
+                message.DateRead = DateTime.UtcNow;
+            }
             
             messageRepository.AddMessage(message);
 
             if (await messageRepository.SaveAllAsync())
             {
-                var group = GetGroupName(sender.UserName, recipient.UserName);
-                await Clients.Group(group).SendAsync("NewMessage", mapper.Map<MessageDto>(message));
+                await Clients.Group(groupName).SendAsync("NewMessage", mapper.Map<MessageDto>(message));
             }
     }
 
@@ -78,5 +87,29 @@ public class MessageHub : Hub
     {
         var stringCompare = string.CompareOrdinal(caller, other) < 0;
         return stringCompare ? $"{caller}-{other}" : $"{other}-{caller}";
+    }
+
+    private async Task<bool> AddToGroup(string groupName)
+    {
+        var group = await messageRepository.GetMessageGroup(groupName);
+        var connection = new Connection(Context.ConnectionId, Context.User.GetUsername());
+
+        if (group == null)
+        {
+            group = new Group(groupName);
+            messageRepository.AddGroup(group);
+        }
+
+        group.Connections.Add(connection);
+
+        return await messageRepository.SaveAllAsync();
+    }
+
+    private async Task RemoveFromMessageGroup()
+    {
+        var connection = await messageRepository.GetConnection(Context.ConnectionId);
+        messageRepository.RemoveConnection(connection);
+        await messageRepository.SaveAllAsync();
+
     }
 }
