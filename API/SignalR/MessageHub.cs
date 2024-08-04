@@ -32,19 +32,23 @@ public class MessageHub : Hub
         var groupName = GetGroupName(Context.User.GetUsername(), otherUser);
 
         await Groups.AddToGroupAsync(Context.ConnectionId, groupName);
-        await AddToGroup(groupName);
+        var group = await AddToGroup(groupName);
+
+        await Clients.Group(groupName).SendAsync("UpdatedGroup", group);
 
         // On connection, and just having created a group, we'll get the message thread 
         // (for this user pair) via SignalR. 
         var messages = await messageRepository.GetMessageThread(Context.User.GetUsername(), otherUser);
-        await Clients.Group(groupName).SendAsync("ReceiveMessageThread", messages);
+        await Clients.Caller.SendAsync("ReceiveMessageThread", messages);
     }
 
     public override async Task OnDisconnectedAsync(Exception exception)
     {
         // When a user disconnects from this hub by moving to another part of the application 
         // they will be automatically removed from any groups they are connected to on this hub.
-        await RemoveFromMessageGroup();
+       var group = await RemoveFromMessageGroup();
+       await Clients.Group(group.Name).SendAsync("UpdatedGroup");
+       
         await base.OnDisconnectedAsync(exception);
     }
 
@@ -105,7 +109,7 @@ public class MessageHub : Hub
         return stringCompare ? $"{caller}-{other}" : $"{other}-{caller}";
     }
 
-    private async Task<bool> AddToGroup(string groupName)
+    private async Task<Group> AddToGroup(string groupName)
     {
         var group = await messageRepository.GetMessageGroup(groupName);
         var connection = new Connection(Context.ConnectionId, Context.User.GetUsername());
@@ -118,14 +122,20 @@ public class MessageHub : Hub
 
         group.Connections.Add(connection);
 
-        return await messageRepository.SaveAllAsync();
+        if (await messageRepository.SaveAllAsync()) return group;
+
+        throw new HubException("Failed to add to group");
     }
 
-    private async Task RemoveFromMessageGroup()
+    private async Task<Group> RemoveFromMessageGroup()
     {
-        var connection = await messageRepository.GetConnection(Context.ConnectionId);
+        var group = await messageRepository.GetGroupForConnection(Context.ConnectionId);
+        var connection = group.Connections.FirstOrDefault(x => x.ConnectionId == Context.ConnectionId);
         messageRepository.RemoveConnection(connection);
         await messageRepository.SaveAllAsync();
 
+        if (await messageRepository.SaveAllAsync()) return group;
+
+        throw new HubException("Failed to remove from group");
     }
 }
