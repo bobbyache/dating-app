@@ -13,8 +13,10 @@ public class PresenceTracker
     // they're connected to one or more devices we consider them to be online.
     private static readonly Dictionary<string, List<string>> onlineUsers = new Dictionary<string, List<string>>();
 
-    public Task UserConnected(string username, string connectionId)
+    public Task<bool> UserConnected(string username, string connectionId)
     {
+        bool isOnline = false;
+
         // A dictionary is not a thread-safe contruct.  Multiple concurrent users accessing the
         // dictionary at the same time could cause issues, so use a lock. Not very scalable but
         // good enough for a prototype in the absence of a more scalable service. It could become
@@ -28,26 +30,31 @@ public class PresenceTracker
             else
             {
                 onlineUsers.Add(username, new List<string>{connectionId});
+                isOnline = true;
             }
         }
 
-        return Task.CompletedTask;
+        return Task.FromResult(isOnline);
     }
 
-    public Task UserDisconnected(string username, string connectionId)
+    public Task<bool> UserDisconnected(string username, string connectionId)
     {
+        bool isOffline = false;
+
         lock (onlineUsers)
         {
-            if (!onlineUsers.ContainsKey(username)) return Task.CompletedTask;
-
+            if (!onlineUsers.ContainsKey(username)) return Task.FromResult(isOffline);
+            
             onlineUsers[username].Remove(connectionId);
+
             if (onlineUsers[username].Count == 0)
             {
                 onlineUsers.Remove(username);
+                isOffline = true;
             }
         }
 
-        return Task.CompletedTask;
+        return Task.FromResult(isOffline);
     }
 
     public Task<string[]> GetOnlineUsers()
