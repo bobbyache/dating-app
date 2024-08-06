@@ -81,16 +81,12 @@ namespace API.Data
                 {
                     message.DateRead = DateTime.UtcNow;
                 }
-
-                await context.SaveChangesAsync();
+                // its dangerous to call SaveChanges() within your repositories. It is not the 
+                // job of the repository to save changes... it is the job of the Unit of Work implementation.
+                // await context.SaveChangesAsync();
             }
 
             return mapper.Map<IEnumerable<MessageDto>>(messages);
-        }
-
-        public async Task<bool> SaveAllAsync()
-        {
-            return await context.SaveChangesAsync() > 0;
         }
 
         public void AddGroup(Group group)
