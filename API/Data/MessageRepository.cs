@@ -53,9 +53,7 @@ namespace API.Data
 
         public async Task<IEnumerable<MessageDto>> GetMessageThread(string currentUsername, string recipientUsername)
         {
-            var messages = await context.Messages
-                .Include(u => u.Sender).ThenInclude(s => s.Photos)
-                .Include(u => u.Recipient).ThenInclude(r => r.Photos)
+            var query = context.Messages
                 .Where(
                     //
                     // Fetch both sides of the message thread
@@ -65,14 +63,15 @@ namespace API.Data
                         m.SenderUsername == currentUsername
                 )
                 .OrderBy(m => m.MessageSent)
-                .ToListAsync();
+                .AsNoTracking()
+                .AsQueryable();
 
             //
             // If there are any unread messages (from the point of view of the logged in user) make sure to mark them as read.
             //
             // TODO: (Rob) This appears to be a violation of CQRS style approach and the single responsibility
             // paradigm. Would prefer this in a seperate method? However, it works most efficiently for this purpose.
-            var unreadMessages = messages.Where(m => m.DateRead == null &&
+            var unreadMessages = query.Where(m => m.DateRead == null &&
                 m.RecipientUsername == currentUsername).ToList();
 
             if (unreadMessages.Any())
@@ -86,7 +85,9 @@ namespace API.Data
                 // await context.SaveChangesAsync();
             }
 
-            return mapper.Map<IEnumerable<MessageDto>>(messages);
+            // Use AutoMapper to project to the MessageDto. This slim down the query and it will mean
+            // that you can remove the "includes".
+            return await query.ProjectTo<MessageDto>(mapper.ConfigurationProvider).ToListAsync();
         }
 
         public void AddGroup(Group group)
