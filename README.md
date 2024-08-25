@@ -943,3 +943,67 @@ It shouldn't be deleted just because the user has deleted their profile.
 ```
 npm install @microsoft/signalr --force
 ```
+
+# Change the database from Sqlite to Postgres (run in Docker image)
+
+Running the following line in the terminal will go out and fetch the latest postgres image, set a password in its environment variables and map its ports. The image will then run as a container in detached mode. Do not try to come up with a fancy password for Docker as it doesn't like special characters and will probably change it to something a little less fancy effectively locking you out of your own machine. This container is only there to run on your local machine in the development environment.
+```
+docker run --name postgres -e POSTGRES_PASSWORD=postgrespw -p 5432:5432 -d postgres:latest
+```
+Once running, you can go and inspect the database properties (as well as the password and ports) in Docker Desktop by drilling into the running container.
+
+Install the `Npgsql.EntityFrameworkCore.PostgreSQL` and the `PostgreSQL` extension (by Chris Kolkman). Once this is done make sure to stop your API as the following operations can only succeed if the API is not running.
+
+```
+dotnet ef database drop
+```
+Update the connection string in the `appSettings.Development.json` file and change the `ApplicationServiceExtensions` class so that it is using Postgres with the following line:
+
+```csharp
+    services.AddDbContext<DataContext>(options =>
+    {
+        // options.UseSqlite(config.GetConnectionString("DefaultConnection"));
+        options.UseNpgsql(config.GetConnectionString("DefaultConnection"));
+
+    });
+```
+Delete the Migrations folder. Don't need it any more and need to run a new migration with Postgres.
+
+```
+dotnet ef migrations add PostgresInitial -o Data/Migrations
+dotnet ef database drop
+
+dotnet run
+```
+
+Fix the Postgres invalid SQL syntax issue...
+
+```csharp
+await Seed.ClearConnections(context);
+```
+
+Fix the UTC issue (all dates for Postgres must be UTC)...
+
+```csharp
+user.Created = DateTime.SpecifyKind(user.Created, DateTimeKind.Utc);
+user.LastActive = DateTime.SpecifyKind(user.LastActive, DateTimeKind.Utc);
+```
+
+Drop and rerun.
+```
+dotnet ef database drop
+dotnet run
+```
+
+Everything should be good at this point. But test it by clicking on the Postgres icon and adding a connection:
+
+```
+- hostname = localhost
+- user = postgres
+- password = postgrespw
+- port = 5432
+- use a standard connection (not ssl)
+- database = datingapp
+```
+
+Take a look inside to see your data.
