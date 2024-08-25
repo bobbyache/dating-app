@@ -6,6 +6,24 @@
 - "Likes" and "Liked by" is not implemented correctly. Feels as if the two should be two seperate use cases. Revisit the code and extract the two from each other.
 - DataContext should also be an interface?
 
+# Production Build Considerations
+
+This code in the `Program.cs` class means that the API will serve up the `index.html` file in the `wwwroot` folder.
+
+```csharp
+// Look for index.html file in the wwwroot folder and serve it
+app.UseDefaultFiles();
+app.UseStaticFiles();
+```
+
+Note that Angular needs to be told where to build its assets to. This is done in the `angular.json` file in the "build" section.
+```
+"builder": "@angular-devkit/build-angular:browser",
+    "options": {
+        "outputPath": "../API/wwwroot",
+    }
+```
+
 # Setup instructions
 
 ### Current Versioning
