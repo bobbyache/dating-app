@@ -8,6 +8,8 @@
 
 # Production Build Considerations
 
+### Serve from `wwwroot`
+
 This code in the `Program.cs` class means that the API will serve up the `index.html` file in the `wwwroot` folder.
 
 ```csharp
@@ -23,6 +25,47 @@ Note that Angular needs to be told where to build its assets to. This is done in
         "outputPath": "../API/wwwroot",
     }
 ```
+
+### Asset Budget
+
+Run `ng build` to build the production distributable assets to the `wwwroot` directory.
+
+The total raw file size for our assets (after minifying, uglifying, optmizing, and bundling) comes to just over 1 MB which is a lot less than the development debuggable asset size. The Estimated Transfer Size after compression (gzipping etc.) is about 240 - 245 kB.
+```
+Initial Chunk Files           | Names         |  Raw Size | Estimated Transfer Size
+main.e549d8b9b012fc60.js      | main          | 855.67 kB |               192.76 kB
+styles.24cba38896da7889.css   | styles        | 434.50 kB |                37.40 kB
+polyfills.4228e72ac58db877.js | polyfills     |  33.05 kB |                10.63 kB
+runtime.01fec06f14767966.js   | runtime       |   1.04 kB |               586 bytes
+
+                              | Initial Total |   1.29 MB |               241.35 kB
+```
+
+However, Angular is complaining because it exceeds the 1 MB budget for the raw file size.
+```
+Build at: 2024-08-25T07:53:29.229Z - Hash: f46b54cbb43f2cd9 - Time: 22983ms
+
+Warning: bundle initial exceeded maximum budget. Budget 500.00 kB was not met by 824.25 kB with a total of 1.29 MB.
+
+Error: bundle initial exceeded maximum budget. Budget 1.00 MB was not met by 300.25 kB with a total of 1.29 MB.
+```
+Remove the error (but stick with the warning) by making modifications to the budgets (in `angular.json`).
+
+```
+"configurations": {
+    "production": {
+        "budgets": [
+        {
+            "type": "initial",
+            "maximumWarning": "500kb",
+            "maximumError": "1mb"
+        },
+```
+After updating the `maximumError` to 2 MB, the error goes away.
+
+### Hashing the files
+
+The files (`main.e549d8b9b012fc60.js` etc) have hashes attached to the name so that the browser does not hold onto older versions once a new one is downloaded. The browser checks to see if it already has the file but because the hash has changed it will go out and get the later version.
 
 # Setup instructions
 
