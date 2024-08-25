@@ -26,6 +26,19 @@ Note that Angular needs to be told where to build its assets to. This is done in
     }
 ```
 
+### Delegate Routing to Angular
+
+At this point, your Angular application will be served when you run your Web API: `http://localhost:5001`. Try this by executing `dotnet run`.
+
+```
+dotnet run
+```
+If you log in you'll successfully hit the members page. If you refresh the application the browser will complain that the page cannot be found. This happens because the Web API still believes its responsible for all routing. Routing needs to be delegated to Angular. This is done using a fall back controller (`FallbackController`) and adding the following line to the `Program.cs` class:
+
+```csharp
+app.MapFallbackToController("Index", "Fallback");
+```
+
 ### Asset Budget
 
 Run `ng build` to build the production distributable assets to the `wwwroot` directory.

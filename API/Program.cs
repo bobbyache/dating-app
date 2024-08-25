@@ -57,6 +57,10 @@ app.MapControllers();
 app.MapHub<PresenceHub>("hubs/presence");
 app.MapHub<MessageHub>("hubs/message");
 
+// Delegate any routing not understood by the Web API to Angular by
+// targeting the index.html page in wwwroot.
+app.MapFallbackToController("Index", "Fallback");
+
 using var scope = app.Services.CreateScope();
 var services = scope.ServiceProvider;
 
