@@ -24,7 +24,10 @@ export class NavComponent implements OnInit {
         // To fix this must inject memberService and over here, reset the user params.
         // then you will get the right filter applied.
         this.accountService.login(this.model).subscribe({
-            next: (_) => this.router.navigateByUrl('/members'),
+            next: _ => {
+                this.router.navigateByUrl('/members');
+                this.model = {};
+            }
         });
     }
 
