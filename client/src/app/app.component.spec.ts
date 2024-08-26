@@ -5,6 +5,10 @@ import { HttpClientTestingModule, HttpTestingController } from '@angular/common/
 import { HttpClient } from '@angular/common/http';
 import { NgxSpinnerModule } from 'ngx-spinner';
 import { NavComponent } from './nav/nav.component';
+import { AccountsService } from './_services/accounts.service';
+import { PresenceService } from './_services/presence.service';
+import { ToastrModule, ToastrService } from 'ngx-toastr';
+import { AppModule } from './app.module';
 
 describe('AppComponent', () => {
     let httpClient: HttpClient;
@@ -13,8 +17,10 @@ describe('AppComponent', () => {
     beforeEach(async () => {
         await TestBed.configureTestingModule({
             imports: [
+                AppModule,
                 RouterTestingModule, 
                 HttpClientTestingModule, 
+                ToastrModule,
                 NgxSpinnerModule.forRoot({ type: 'line-scale-party' }), 
             ],
             declarations: [AppComponent, NavComponent]

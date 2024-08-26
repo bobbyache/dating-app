@@ -75,7 +75,7 @@ xdescribe('MemberMessagesComponent', () => {
     describe('when 3 messages exist for bob', () => {
         beforeEach(() => {
             component.username = 'Bob';
-            component.messages = messagesStub;
+            // component.messages = messagesStub;
             fixture.detectChanges();
         });
 
@@ -88,7 +88,7 @@ xdescribe('MemberMessagesComponent', () => {
     describe('when no messages exist for bob', () => {
         beforeEach(() => {
             component.username = 'Bob';
-            component.messages = [];
+            // component.messages = [];
             fixture.detectChanges();
         });
 

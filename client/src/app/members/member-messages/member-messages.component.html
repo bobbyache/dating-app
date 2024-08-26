@@ -1,6 +1,6 @@
 <div class="card">
     <div class="card-body">
-        <div class="no-messages" *ngIf="messages.length === 0">
+        <div class="no-messages" *ngIf="(messageService.messageThread$ | async)!.length > 0">
             No messages yet... say hi by using the message box below
         </div>
 
