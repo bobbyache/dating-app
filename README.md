@@ -1037,3 +1037,10 @@ Then everything works... navigate to the site with http://localhost:8080
 docker exec flamboyant_davinci ls /app
 docker exec flamboyant_davinci ls /app/wwwroot
 ```
+
+### Push image into DockerHub
+
+```
+docker login
+docker push docker.io/username/datingapp:latest
+```
