@@ -1007,3 +1007,33 @@ Everything should be good at this point. But test it by clicking on the Postgres
 ```
 
 Take a look inside to see your data.
+
+# Dockerize the Solution
+
+See `Dockerfile` and `.dockerignore`. Run the following to create the container.
+```
+docker build . -t username/datingapp
+```
+
+Try and run the container.
+- `--rm` specifies the container will be removed from local containers when it quits.
+- `-it` to display Docker logs when running.
+- Port 8080 to browse to the app but internally it will be running on port 80.
+
+```
+docker run --rm -it -p 8080:80 -t username/datingapp:latest
+```
+When one runs this command one runs into a `ERR_CONNECTION_REFUSED`. [Here is the question that helped me solve this issue](https://www.udemy.com/course/build-an-app-with-aspnet-core-and-angular-from-scratch/learn/lecture/44331964#questions/21330240).[Here is the question that helped solve this issue](https://www.udemy.com/course/build-an-app-with-aspnet-core-and-angular-from-scratch/learn/lecture/44331964#questions/21330240). Even if one exposes port 80 in the `Dockerfile`, so instead of doing this...
+
+So rather use...
+```
+docker run --rm -it -p 8080:8080 -t username/datingapp:latest
+```
+Then everything works... navigate to the site with http://localhost:8080
+
+### To look inside the running container
+
+```
+docker exec flamboyant_davinci ls /app
+docker exec flamboyant_davinci ls /app/wwwroot
+```
