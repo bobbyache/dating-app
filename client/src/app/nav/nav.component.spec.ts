@@ -4,6 +4,8 @@ import { DebugElement } from "@angular/core";
 import { HttpClientModule } from "@angular/common/http";
 import { AccountsService } from "../_services/accounts.service";
 import { Router } from "@angular/router";
+import { of } from "rxjs";
+// import { FormsModule } from "@angular/forms";
 
 describe('NavComponent', () => {
     let component: NavComponent;
@@ -15,10 +17,11 @@ describe('NavComponent', () => {
     beforeEach(waitForAsync(() => {
 
         accountServiceStub = jasmine.createSpyObj('AccountsService', ['login', 'logout']);
-        routerStub = jasmine.createSpyObj('Router', ['navigate']);
+        routerStub = jasmine.createSpyObj('Router', ['navigateByUrl']);
 
         TestBed.configureTestingModule({
             imports: [
+                // FormsModule,
                 HttpClientModule
             ],
             declarations: [
